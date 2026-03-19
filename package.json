@@ -1,0 +1,23 @@
+{
+  "name": "@opencode-ai/opensearch",
+  "version": "0.0.1",
+  "description": "Universal intelligent search plugin for opencode",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "latest",
+    "@opencode-ai/sdk": "latest",
+    "zod": "^3.24.0",
+    "zod-to-json-schema": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.0"
+  },
+  "peerDependencies": {
+    "bun": ">=1.2.0"
+  }
+}
