@@ -1,11 +1,32 @@
 {
   "name": "@opencode-ai/opensearch",
   "version": "0.0.1",
-  "description": "Universal intelligent search plugin for opencode",
+  "description": "OpenCode plugin that combines session, web, and code search",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CONTRIBUTING.md",
+    "SKILL.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "bun tsc",
+    "typecheck": "bun tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "bun run typecheck && bun run test && bun run build",
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
     "@opencode-ai/plugin": "latest",
@@ -14,10 +35,16 @@
     "zod-to-json-schema": "^3.24.0"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.0"
+    "@types/bun": "1.3.11",
+    "conventional-changelog-conventionalcommits": "9.3.0",
+    "semantic-release": "25.0.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
   },
   "peerDependencies": {
     "bun": ">=1.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
