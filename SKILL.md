@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires OpenCode with @opencode-ai/opensearch installed. Web results need OPENSEARCH_WEB_KEY or EXA_API_KEY.
 metadata:
   author: Aor Umbayev
-  version: 0.1.0
+  version: 0.0.1
 ---
 
 # OpenSearch Skill
@@ -28,7 +28,7 @@ Use this skill when the task is primarily about finding, comparing, and synthesi
 ## Default Workflow
 
 1. Call `opensearch` first for broad or ambiguous research questions.
-2. Default to `depth: "thorough"` unless the user clearly wants a quick pass.
+2. Prefer `depth: "thorough"` for broad or ambiguous research; keep `quick` for focused lookups.
 3. Use all sources when external context matters; narrow sources only when the user asks for repo-local or session-local evidence.
 4. Summarize what the tool found, highlight contradictions or gaps, then continue with implementation or recommendation.
 
