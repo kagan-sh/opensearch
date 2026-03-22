@@ -1,15 +1,37 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
+export const SOURCE_IDS = ["session", "web", "code"] as const;
+export const DEPTHS = ["quick", "thorough"] as const;
+export const RESULT_STATUSES = [
+  "ok",
+  "raw",
+  "raw_fallback",
+  "no_sources",
+  "no_results",
+] as const;
+
+export const SourceIdSchema = z.enum(SOURCE_IDS);
+export const DepthSchema = z.enum(DEPTHS);
+export const ResultStatusSchema = z.enum(RESULT_STATUSES);
+
 export const SourceSchema = z
   .object({
     id: z.string(),
-    type: z.enum(["session", "web", "code"]),
+    type: SourceIdSchema,
     url: z.string().optional(),
     title: z.string(),
     snippet: z.string(),
     relevance: z.number().min(0).max(1),
     timestamp: z.number().optional(),
+  })
+  .strict();
+
+export const SourceErrorSchema = z
+  .object({
+    source: SourceIdSchema,
+    code: z.enum(["unavailable", "request_failed", "invalid_response"]),
+    message: z.string(),
   })
   .strict();
 
@@ -23,6 +45,7 @@ export const EvidenceSchema = z
 
 export const ResultSchema = z
   .object({
+    status: ResultStatusSchema,
     answer: z.string(),
     confidence: z.enum(["high", "medium", "low", "none"]),
     evidence: z.array(EvidenceSchema),
@@ -32,17 +55,26 @@ export const ResultSchema = z
       .object({
         query: z.string(),
         duration: z.number(),
+        sources_requested: z.number(),
         sources_queried: z.number(),
         sources_yielded: z.number(),
+        sources_unavailable: z.array(SourceIdSchema),
+        source_errors: z.array(SourceErrorSchema),
       })
       .strict(),
   })
   .strict();
 
+export const SynthesisSchema = ResultSchema.omit({
+  status: true,
+  sources: true,
+  meta: true,
+});
+
 export const RawResultSchema = z
   .object({
     id: z.string(),
-    type: z.enum(["session", "web", "code"]),
+    type: SourceIdSchema,
     title: z.string(),
     snippet: z.string(),
     url: z.string().optional(),
@@ -65,17 +97,26 @@ export const ConfigSchema = z
         code: z.boolean(),
       })
       .strict(),
-    depth: z.enum(["quick", "thorough"]),
+    depth: DepthSchema,
     synth: z.boolean(),
   })
   .strict();
 
+export type SourceId = z.infer<typeof SourceIdSchema>;
+export type Depth = z.infer<typeof DepthSchema>;
+export type ResultStatus = z.infer<typeof ResultStatusSchema>;
 export type Source = z.infer<typeof SourceSchema>;
+export type SourceError = z.infer<typeof SourceErrorSchema>;
 export type Evidence = z.infer<typeof EvidenceSchema>;
 export type Result = z.infer<typeof ResultSchema>;
+export type Synthesis = z.infer<typeof SynthesisSchema>;
 export type RawResult = z.infer<typeof RawResultSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
 
 export function resultJsonSchema() {
   return zodToJsonSchema(ResultSchema, "OpensearchResult");
+}
+
+export function synthesisJsonSchema() {
+  return zodToJsonSchema(SynthesisSchema, "OpensearchSynthesis");
 }

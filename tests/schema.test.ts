@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ResultSchema, resultJsonSchema } from "../src/schema";
 
 const sample = {
+  status: "ok",
   answer: "Use session and web results together.",
   confidence: "high",
   evidence: [
@@ -24,8 +25,11 @@ const sample = {
   meta: {
     query: "plugin loading",
     duration: 12,
+    sources_requested: 2,
     sources_queried: 2,
     sources_yielded: 1,
+    sources_unavailable: [],
+    source_errors: [],
   },
 } as const;
 

@@ -142,10 +142,12 @@ describe("opensearch acceptance", () => {
       ctx(dir),
     );
     const body = JSON.parse(out) as {
+      status: string;
       answer: string;
       sources: unknown[];
     };
 
+    expect(body.status).toBe("no_results");
     expect(body.answer).toBe("No results found");
     expect(body.sources).toHaveLength(0);
   });

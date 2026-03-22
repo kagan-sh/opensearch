@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { OpensearchPlugin } from "../src/index";
+
+const originalFetch = globalThis.fetch;
 
 function createToolContext(directory: string) {
   const calls: Array<{ title?: string; metadata?: Record<string, unknown> }> = [];
@@ -21,16 +23,25 @@ function createToolContext(directory: string) {
   };
 }
 
+function createHooks(client: unknown = {} as never) {
+  return OpensearchPlugin({
+    client: client as never,
+    directory: "/tmp/opensearch",
+    worktree: "/tmp/opensearch",
+    project: {} as never,
+    serverUrl: new URL("http://127.0.0.1:4096"),
+    $: {} as never,
+  });
+}
+
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+  vi.restoreAllMocks();
+});
+
 describe("opensearch tool", () => {
-  it("skips unavailable default sources", async () => {
-    const hooks = await OpensearchPlugin({
-      client: {} as never,
-      directory: "/tmp/opensearch",
-      worktree: "/tmp/opensearch",
-      project: {} as never,
-      serverUrl: new URL("http://127.0.0.1:4096"),
-      $: {} as never,
-    });
+  it("reports when no sources are available by default", async () => {
+    const hooks = await createHooks();
 
     await hooks.config?.({
       opensearch: {
@@ -53,32 +64,33 @@ describe("opensearch tool", () => {
       runtime.context,
     );
     const body = JSON.parse(output) as {
+      status: string;
       answer: string;
       sources: unknown[];
       followups: string[];
       meta: {
+        sources_requested: number;
         sources_queried: number;
         sources_yielded: number;
+        sources_unavailable: string[];
       };
     };
 
+    expect(body.status).toBe("no_sources");
     expect(body.answer).toBe("No sources available");
     expect(body.sources).toHaveLength(0);
     expect(body.followups[0]).toContain("Enable at least one search source");
+    expect(body.meta.sources_requested).toBe(3);
     expect(body.meta.sources_queried).toBe(0);
     expect(body.meta.sources_yielded).toBe(0);
-    expect(runtime.calls[runtime.calls.length - 1]?.title).toBe("OpenSearch · unavailable");
+    expect(body.meta.sources_unavailable).toEqual(["session", "web", "code"]);
+    expect(runtime.calls[runtime.calls.length - 1]?.title).toBe(
+      "OpenSearch · unavailable",
+    );
   });
 
-  it("skips explicitly requested web search without an API key", async () => {
-    const hooks = await OpensearchPlugin({
-      client: {} as never,
-      directory: "/tmp/opensearch",
-      worktree: "/tmp/opensearch",
-      project: {} as never,
-      serverUrl: new URL("http://127.0.0.1:4096"),
-      $: {} as never,
-    });
+  it("reports explicitly requested unavailable sources", async () => {
+    const hooks = await createHooks();
 
     await hooks.config?.({
       opensearch: {
@@ -101,29 +113,30 @@ describe("opensearch tool", () => {
       runtime.context,
     );
     const body = JSON.parse(output) as {
+      status: string;
       answer: string;
       meta: {
+        sources_requested: number;
         sources_queried: number;
         sources_yielded: number;
+        sources_unavailable: string[];
       };
     };
 
+    expect(body.status).toBe("no_sources");
     expect(body.answer).toBe("No sources available");
+    expect(body.meta.sources_requested).toBe(1);
     expect(body.meta.sources_queried).toBe(0);
     expect(body.meta.sources_yielded).toBe(0);
+    expect(body.meta.sources_unavailable).toEqual(["web"]);
     expect(runtime.calls[0]?.metadata?.phase).toBe("searching");
-    expect(runtime.calls[runtime.calls.length - 1]?.metadata?.source_summary).toBe("no sources");
+    expect(runtime.calls[runtime.calls.length - 1]?.metadata?.source_summary).toBe(
+      "no sources",
+    );
   });
 
   it("brands tool definitions and completion metadata", async () => {
-    const hooks = await OpensearchPlugin({
-      client: {} as never,
-      directory: "/tmp/opensearch",
-      worktree: "/tmp/opensearch",
-      project: {} as never,
-      serverUrl: new URL("http://127.0.0.1:4096"),
-      $: {} as never,
-    });
+    const hooks = await createHooks();
 
     const toolDefinition = {
       description: "placeholder",
@@ -138,6 +151,7 @@ describe("opensearch tool", () => {
       title: "",
       output: JSON.stringify(
         {
+          status: "raw",
           answer: "Raw results (synthesis disabled)",
           confidence: "none",
           evidence: [],
@@ -146,8 +160,11 @@ describe("opensearch tool", () => {
           meta: {
             query: "docs",
             duration: 42,
+            sources_requested: 2,
             sources_queried: 2,
             sources_yielded: 3,
+            sources_unavailable: [],
+            source_errors: [],
           },
         },
         null,
@@ -176,8 +193,148 @@ describe("opensearch tool", () => {
       phase: "completed",
       depth: "thorough",
       source_summary: "web + code",
+      status: "raw",
       duration_ms: 42,
+      sources_requested: 2,
       sources_yielded: 3,
+      source_errors: 0,
     });
+  });
+
+  it("rejects invalid plugin config explicitly", async () => {
+    const hooks = await createHooks();
+
+    await expect(
+      hooks.config?.({
+        opensearch: {
+          sources: {
+            session: "sometimes",
+            web: { enabled: true },
+            code: true,
+          },
+          depth: "quick",
+          synth: false,
+        },
+      } as never),
+    ).rejects.toThrow("Invalid opensearch config");
+  });
+
+  it("reports source errors explicitly when a source request fails", async () => {
+    globalThis.fetch = vi
+      .fn<typeof fetch>()
+      .mockRejectedValue(new Error("network down"));
+
+    const hooks = await createHooks();
+    await hooks.config?.({
+      opensearch: {
+        sources: {
+          session: false,
+          web: { enabled: false },
+          code: true,
+        },
+        depth: "quick",
+        synth: false,
+      },
+    } as never);
+
+    const tool = hooks.tool?.opensearch;
+    if (!tool) throw new Error("opensearch tool missing");
+
+    const output = await tool.execute(
+      { query: "broken-code-search", sources: ["code"] },
+      createToolContext("/tmp/opensearch").context,
+    );
+    const body = JSON.parse(output) as {
+      status: string;
+      answer: string;
+      followups: string[];
+      meta: {
+        sources_requested: number;
+        sources_queried: number;
+        sources_yielded: number;
+        source_errors: Array<{
+          source: string;
+          code: string;
+          message: string;
+        }>;
+      };
+    };
+
+    expect(body.status).toBe("no_results");
+    expect(body.answer).toBe("No results found");
+    expect(body.followups[0]).toBe(
+      "Inspect meta.source_errors for failed search sources",
+    );
+    expect(body.meta.sources_requested).toBe(1);
+    expect(body.meta.sources_queried).toBe(1);
+    expect(body.meta.sources_yielded).toBe(0);
+    expect(body.meta.source_errors).toHaveLength(1);
+    expect(body.meta.source_errors[0]).toMatchObject({
+      source: "code",
+      code: "request_failed",
+    });
+    expect(body.meta.source_errors[0]?.message).toContain("network down");
+  });
+
+  it("falls back to raw results when synthesis fails", async () => {
+    globalThis.fetch = vi.fn<typeof fetch>().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        hits: {
+          hits: [
+            {
+              repo: { raw: "example/repo" },
+              path: { raw: "src/example.ts" },
+              content: { snippet: "const example = true;" },
+              score: 42,
+            },
+          ],
+        },
+      }),
+    } as Response);
+
+    const hooks = await createHooks({
+      session: {
+        create: async () => ({ data: { id: "synth" } }),
+        prompt: async () => {
+          throw new Error("synthesis boom");
+        },
+        delete: async () => undefined,
+      },
+    });
+    await hooks.config?.({
+      opensearch: {
+        sources: {
+          session: false,
+          web: { enabled: false },
+          code: true,
+        },
+        depth: "quick",
+        synth: true,
+      },
+    } as never);
+
+    const tool = hooks.tool?.opensearch;
+    if (!tool) throw new Error("opensearch tool missing");
+
+    const output = await tool.execute(
+      { query: "example", sources: ["code"] },
+      createToolContext("/tmp/opensearch").context,
+    );
+    const body = JSON.parse(output) as {
+      status: string;
+      answer: string;
+      sources: unknown[];
+      meta: {
+        sources_yielded: number;
+      };
+    };
+
+    expect(body.status).toBe("raw_fallback");
+    expect(body.answer).toBe(
+      "Unable to synthesize structured answer. Returning raw evidence.",
+    );
+    expect(body.sources).toHaveLength(1);
+    expect(body.meta.sources_yielded).toBe(1);
   });
 });

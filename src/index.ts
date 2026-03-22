@@ -1,113 +1,24 @@
 import type { Plugin } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
+import { defaultConfig, parsePluginConfig, resolveSources } from "./config";
 import {
-  ConfigSchema,
-  type Config,
-  type RawResult,
-  type Result,
+  noResultsResult,
+  noSourcesResult,
+  rawResultsResult,
+  runSourceSearches,
+  synthesizedResult,
+} from "./orchestrator";
+import {
+  DEPTHS,
   ResultSchema,
-  type Source,
+  SOURCE_IDS,
+  type Config,
+  type Result,
+  type SourceId,
 } from "./schema";
-import { searchCode } from "./sources/code";
-import { searchSessions } from "./sources/session";
-import { searchWeb } from "./sources/web";
 import { synthesize } from "./synth";
 
-const SOURCE_IDS = ["session", "web", "code"] as const;
 const BRAND = "OpenSearch";
-
-type SourceId = (typeof SOURCE_IDS)[number];
-
-function parseBoolean(value: string | undefined, fallback: boolean) {
-  if (value === undefined) return fallback;
-  if (value.toLowerCase() === "true") return true;
-  if (value.toLowerCase() === "false") return false;
-  return fallback;
-}
-
-function parseDepth(value: string | undefined): Config["depth"] {
-  if (value === "thorough") return "thorough";
-  return "quick";
-}
-
-function clampUnit(value: number) {
-  return Math.max(0, Math.min(1, value));
-}
-
-function parseConfig(input: unknown): Config | undefined {
-  if (!input || typeof input !== "object" || !("opensearch" in input)) {
-    return undefined;
-  }
-
-  const parsed = ConfigSchema.safeParse(input.opensearch);
-  return parsed.success ? parsed.data : undefined;
-}
-
-function isSourceAvailable(config: Config, source: SourceId) {
-  if (source === "session") return config.sources.session;
-  if (source === "web") {
-    return config.sources.web.enabled && Boolean(config.sources.web.key);
-  }
-  return config.sources.code;
-}
-
-function resolveSources(config: Config, requested?: SourceId[]) {
-  const selected = requested ?? SOURCE_IDS.filter((source) => isSourceAvailable(config, source));
-  return Array.from(new Set(selected)).filter((source) => isSourceAvailable(config, source));
-}
-
-function resultMeta(
-  query: string,
-  start: number,
-  sourcesQueried: number,
-  sourcesYielded: number,
-) {
-  return {
-    query,
-    duration: Date.now() - start,
-    sources_queried: sourcesQueried,
-    sources_yielded: sourcesYielded,
-  };
-}
-
-function noResults(query: string, start: number, sourcesQueried: number): Result {
-  const noSourcesAvailable = sourcesQueried === 0;
-  return {
-    answer: noSourcesAvailable ? "No sources available" : "No results found",
-    confidence: "none",
-    evidence: [],
-    sources: [],
-    followups: noSourcesAvailable
-      ? [
-          "Enable at least one search source in opensearch config",
-          "Set OPENSEARCH_WEB_KEY or EXA_API_KEY to enable web search",
-        ]
-      : [
-          `Use broader terms for: ${query}`,
-          `Search only web for: ${query}`,
-        ],
-    meta: resultMeta(query, start, sourcesQueried, 0),
-  };
-}
-
-function rawOnlyResults(
-  query: string,
-  start: number,
-  sourcesQueried: number,
-  raw: RawResult[],
-): Result {
-  return {
-    answer: "Raw results (synthesis disabled)",
-    confidence: "none",
-    evidence: [],
-    sources: raw.map(normalize),
-    followups: [
-      `Enable synthesis for: ${query}`,
-      `Filter to one source for: ${query}`,
-    ],
-    meta: resultMeta(query, start, sourcesQueried, raw.length),
-  };
-}
 
 function serialize(result: Result) {
   return JSON.stringify(result, null, 2);
@@ -130,14 +41,12 @@ function runningTitle(sources: SourceId[]) {
 }
 
 function doneTitle(result: Result) {
-  if (result.answer === "No sources available") return `${BRAND} · unavailable`;
-  if (result.answer === "No results found") return `${BRAND} · no matches`;
-  if (result.answer === "Raw results (synthesis disabled)") {
+  if (result.status === "no_sources") return `${BRAND} · unavailable`;
+  if (result.status === "no_results") return `${BRAND} · no matches`;
+  if (result.status === "raw") {
     return `${BRAND} · ${result.meta.sources_yielded} raw result${result.meta.sources_yielded === 1 ? "" : "s"}`;
   }
-  if (result.answer === "Unable to synthesize structured answer. Returning raw evidence.") {
-    return `${BRAND} · evidence fallback`;
-  }
+  if (result.status === "raw_fallback") return `${BRAND} · evidence fallback`;
   return `${BRAND} · ${result.meta.sources_yielded} result${result.meta.sources_yielded === 1 ? "" : "s"}`;
 }
 
@@ -157,45 +66,34 @@ function toolMetadata(input: {
     source_summary: describeSources(input.sources),
     ...(input.result
       ? {
+          status: input.result.status,
           answer: input.result.answer,
           duration_ms: input.result.meta.duration,
+          sources_requested: input.result.meta.sources_requested,
           sources_queried: input.result.meta.sources_queried,
           sources_yielded: input.result.meta.sources_yielded,
+          source_errors: input.result.meta.source_errors.length,
+          sources_unavailable: input.result.meta.sources_unavailable,
         }
       : {}),
   };
 }
 
 function parseResultOutput(output: string) {
-  const parsed = ResultSchema.safeParse(JSON.parse(output));
-  return parsed.success ? parsed.data : undefined;
+  try {
+    const parsed = ResultSchema.safeParse(JSON.parse(output));
+    return parsed.success ? parsed.data : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-function defaultConfig(): Config {
-  return {
-    sources: {
-      session: parseBoolean(process.env.OPENSEARCH_SOURCE_SESSION, true),
-      web: {
-        enabled: parseBoolean(process.env.OPENSEARCH_SOURCE_WEB, true),
-        key: process.env.OPENSEARCH_WEB_KEY ?? process.env.EXA_API_KEY,
-      },
-      code: parseBoolean(process.env.OPENSEARCH_SOURCE_CODE, true),
-    },
-    depth: parseDepth(process.env.OPENSEARCH_DEPTH),
-    synth: parseBoolean(process.env.OPENSEARCH_SYNTH, true),
-  };
-}
-
-function normalize(raw: RawResult): Source {
-  return {
-    id: raw.id,
-    type: raw.type,
-    title: raw.title,
-    snippet: raw.snippet,
-    url: raw.url,
-    relevance: clampUnit(raw.relevance),
-    timestamp: raw.timestamp,
-  };
+function parseRequestedSources(value: unknown): SourceId[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value.filter(
+    (source: unknown): source is SourceId =>
+      typeof source === "string" && SOURCE_IDS.includes(source as SourceId),
+  );
 }
 
 export const OpensearchPlugin: Plugin = async (ctx) => {
@@ -203,7 +101,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
 
   return {
     async config(input) {
-      const next = parseConfig(input);
+      const next = parsePluginConfig(input);
       if (next) cfg = next;
     },
     "tool.definition": async (input, output) => {
@@ -215,6 +113,10 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
       if (input.tool !== "opensearch") return;
       const result = parseResultOutput(output.output);
       if (!result) return;
+      const requested = parseRequestedSources(input.args?.sources);
+
+      const resolved = resolveSources(cfg, requested);
+
       output.title = doneTitle(result);
       output.metadata = {
         ...(output.metadata ?? {}),
@@ -225,13 +127,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
             input.args && typeof input.args.depth === "string"
               ? input.args.depth
               : cfg.depth,
-          sources:
-            input.args && Array.isArray(input.args.sources)
-              ? input.args.sources.filter(
-                  (source: unknown): source is SourceId =>
-                    typeof source === "string" && SOURCE_IDS.includes(source as SourceId),
-                )
-              : SOURCE_IDS.filter((source) => isSourceAvailable(cfg, source)),
+          sources: requested ?? resolved.sources,
           result,
         }),
       };
@@ -243,56 +139,74 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
         args: {
           query: tool.schema.string().describe("What to search for"),
           sources: tool.schema
-            .array(tool.schema.enum(["session", "web", "code"]))
+            .array(tool.schema.enum(SOURCE_IDS))
             .optional()
             .describe("Sources to query. Defaults to all enabled."),
           depth: tool.schema
-            .enum(["quick", "thorough"])
+            .enum(DEPTHS)
             .optional()
             .describe("Search depth. Default: quick"),
         },
         async execute(args, context) {
           const start = Date.now();
           const searchDepth = args.depth ?? cfg.depth;
-          const sources = resolveSources(cfg, args.sources);
+          const resolved = resolveSources(cfg, args.sources);
+
           context.metadata({
-            title: runningTitle(sources),
+            title: runningTitle(resolved.sources),
             metadata: toolMetadata({
               phase: "searching",
               query: args.query,
               depth: searchDepth,
-              sources,
+              sources: resolved.sources,
             }),
           });
-          const searches = sources.map((source) => {
-            if (source === "session") {
-              return searchSessions(
-                ctx.client,
-                context.directory,
-                args.query,
-                searchDepth,
-              );
-            }
-            if (source === "web") {
-              return searchWeb(args.query, cfg.sources.web.key, searchDepth);
-            }
-            return searchCode(args.query, searchDepth);
-          });
 
-          const settled = await Promise.allSettled(searches);
-          const raw = settled
-            .filter((item) => item.status === "fulfilled")
-            .flatMap((item) => (item.status === "fulfilled" ? item.value : []));
-
-          if (raw.length === 0) {
-            const result = noResults(args.query, start, sources.length);
+          if (resolved.sources.length === 0) {
+            const result = noSourcesResult({
+              query: args.query,
+              start,
+              requested: resolved.requested,
+              unavailable: resolved.unavailable,
+            });
             context.metadata({
               title: doneTitle(result),
               metadata: toolMetadata({
                 phase: "completed",
                 query: args.query,
                 depth: searchDepth,
-                sources,
+                sources: resolved.sources,
+                result,
+              }),
+            });
+            return serialize(result);
+          }
+
+          const search = await runSourceSearches({
+            client: ctx.client,
+            directory: context.directory,
+            config: cfg,
+            query: args.query,
+            depth: searchDepth,
+            sources: resolved.sources,
+          });
+
+          if (search.raw.length === 0) {
+            const result = noResultsResult({
+              query: args.query,
+              start,
+              requested: resolved.requested,
+              queried: resolved.sources,
+              unavailable: resolved.unavailable,
+              sourceErrors: search.sourceErrors,
+            });
+            context.metadata({
+              title: doneTitle(result),
+              metadata: toolMetadata({
+                phase: "completed",
+                query: args.query,
+                depth: searchDepth,
+                sources: resolved.sources,
                 result,
               }),
             });
@@ -307,32 +221,51 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
                   phase: "synthesizing",
                   query: args.query,
                   depth: searchDepth,
-                  sources,
+                  sources: resolved.sources,
                 }),
-                raw_results: raw.length,
+                raw_results: search.raw.length,
               },
             });
+
             try {
-              const result = await synthesize(
+              const synthesis = await synthesize(
                 ctx.client,
                 context.directory,
-                raw,
+                search.raw,
                 args.query,
               );
-              result.meta = resultMeta(args.query, start, sources.length, raw.length);
+              const result = synthesizedResult({
+                query: args.query,
+                start,
+                requested: resolved.requested,
+                queried: resolved.sources,
+                unavailable: resolved.unavailable,
+                sourceErrors: search.sourceErrors,
+                raw: search.raw,
+                synthesis,
+              });
               context.metadata({
                 title: doneTitle(result),
                 metadata: toolMetadata({
                   phase: "completed",
                   query: args.query,
                   depth: searchDepth,
-                  sources,
+                  sources: resolved.sources,
                   result,
                 }),
               });
               return serialize(result);
             } catch {
-              const result = rawOnlyResults(args.query, start, sources.length, raw);
+              const result = rawResultsResult({
+                query: args.query,
+                start,
+                requested: resolved.requested,
+                queried: resolved.sources,
+                unavailable: resolved.unavailable,
+                sourceErrors: search.sourceErrors,
+                raw: search.raw,
+                status: "raw_fallback",
+              });
               context.metadata({
                 title: doneTitle(result),
                 metadata: {
@@ -340,24 +273,33 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
                     phase: "completed",
                     query: args.query,
                     depth: searchDepth,
-                    sources,
+                    sources: resolved.sources,
                     result,
                   }),
-                  fallback: "raw_results",
+                  fallback: "synthesis_error",
                 },
               });
               return serialize(result);
             }
           }
 
-          const result = rawOnlyResults(args.query, start, sources.length, raw);
+          const result = rawResultsResult({
+            query: args.query,
+            start,
+            requested: resolved.requested,
+            queried: resolved.sources,
+            unavailable: resolved.unavailable,
+            sourceErrors: search.sourceErrors,
+            raw: search.raw,
+            status: "raw",
+          });
           context.metadata({
             title: doneTitle(result),
             metadata: toolMetadata({
               phase: "completed",
               query: args.query,
               depth: searchDepth,
-              sources,
+              sources: resolved.sources,
               result,
             }),
           });

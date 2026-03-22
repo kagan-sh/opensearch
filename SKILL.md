@@ -2,9 +2,8 @@
 name: opensearch
 description: Use OpenSearch for broad, evidence-backed investigation across session history, the web, and public code when a user asks to search, research, compare sources, or gather official docs and examples.
 license: MIT
-compatibility: Requires OpenCode with @opencode-ai/opensearch installed. Web results need OPENSEARCH_WEB_KEY or EXA_API_KEY.
+compatibility: Requires OpenCode with @kagan-sh/opensearch installed. Web results need OPENSEARCH_WEB_KEY or EXA_API_KEY.
 metadata:
-  author: Aor Umbayev
   version: 0.0.1
 ---
 

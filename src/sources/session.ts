@@ -1,5 +1,6 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk";
-import type { RawResult } from "../schema";
+import type { Depth, RawResult } from "../schema";
+import { failure, messageFromError, sourceError, type SourceSearchOutcome } from "./shared";
 
 function words(query: string) {
   return query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -20,25 +21,42 @@ export async function searchSessions(
   client: ReturnType<typeof createOpencodeClient>,
   directory: string,
   query: string,
-  depth: "quick" | "thorough",
-): Promise<RawResult[]> {
+  depth: Depth,
+): Promise<SourceSearchOutcome> {
+  const source = "session" as const;
   const key = words(query);
-  if (key.length === 0) return [];
+  if (key.length === 0) {
+    return {
+      source,
+      results: [],
+    };
+  }
 
-  const listRes = await client.session.list({ query: { directory } }).catch(
-    () =>
-      ({
-        data: [] as Array<{
-          id: string;
-          title: string;
-          time: { updated: number };
-        }>,
-      }) as {
-        data: Array<{ id: string; title: string; time: { updated: number } }>;
-      },
-  );
+  let listRes:
+    | {
+        data?: Array<{ id: string; title: string; time: { updated: number } }>;
+      }
+    | undefined;
 
-  const list = listRes.data ?? [];
+  try {
+    listRes = await client.session.list({ query: { directory } });
+  } catch (error) {
+    return failure(
+      source,
+      "request_failed",
+      `Session search failed: ${messageFromError(error)}`,
+    );
+  }
+
+  if (!Array.isArray(listRes?.data)) {
+    return failure(
+      source,
+      "invalid_response",
+      "Session search returned an invalid session list.",
+    );
+  }
+
+  const list = listRes.data;
 
   const top = list
     .filter((item) =>
@@ -46,32 +64,24 @@ export async function searchSessions(
     )
     .slice(0, depth === "quick" ? 5 : 15);
 
-  const out = await Promise.all(
+  const settled = await Promise.allSettled(
     top.map(async (item) => {
-      const msgRes = await client.session
-        .messages({
-          path: { id: item.id },
-          query: { directory, limit: depth === "quick" ? 50 : 200 },
-        })
-        .catch(
-          () =>
-            ({
-              data: [] as Array<{
-                parts: Array<{ type: string; text?: string }>;
-              }>,
-            }) as {
-              data: Array<{ parts: Array<{ type: string; text?: string }> }>;
-            },
-        );
+      const msgRes = await client.session.messages({
+        path: { id: item.id },
+        query: { directory, limit: depth === "quick" ? 50 : 200 },
+      });
+      if (!Array.isArray(msgRes.data)) {
+        throw new Error("invalid session transcript payload");
+      }
 
-      const body = (msgRes.data ?? []).map((row) => text(row.parts)).join("\n");
+      const body = msgRes.data.map((row) => text(row.parts)).join("\n");
       const hit = key.reduce((sum, word) => sum + count(body, word), 0);
       const rel = Math.min(1, hit / Math.max(1, key.length * 4));
       if (hit === 0) return null;
 
       return {
         id: item.id,
-        type: "session",
+        type: source,
         title: item.title,
         snippet: body.slice(0, 700) || item.title,
         url: item.id,
@@ -81,5 +91,23 @@ export async function searchSessions(
     }),
   );
 
-  return out.filter((item): item is NonNullable<typeof item> => item !== null);
+  const results = settled.flatMap((item) => {
+    if (item.status !== "fulfilled" || item.value === null) return [];
+    return [item.value];
+  });
+  const failed = settled.filter((item) => item.status === "rejected").length;
+
+  return {
+    source,
+    results,
+    ...(failed > 0
+      ? {
+          error: sourceError(
+            source,
+            "request_failed",
+            `Failed to read ${failed} session ${failed === 1 ? "transcript" : "transcripts"}.`,
+          ),
+        }
+      : {}),
+  };
 }

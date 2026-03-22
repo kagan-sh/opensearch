@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a new capability or datasource for OpenSearch.
+title: "[feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that OpenSearch cannot do today?
+      placeholder: I need OpenSearch to search...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the smallest useful behavior that would solve the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example queries
+      description: Give 3-5 example searches or prompts that should work after this ships.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request type
+      options:
+        - New datasource
+        - Search behavior improvement
+        - Result contract change
+        - Configuration change
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: datasource_details
+    attributes:
+      label: Datasource details
+      description: If this is a datasource request, include provider, auth model, searchable objects, example citations, rate limits, and privacy constraints.
+      placeholder: Provider, auth, searchable objects, expected evidence shape...
+    validations:
+      required: false

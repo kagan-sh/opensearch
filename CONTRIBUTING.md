@@ -1,4 +1,4 @@
-# Contributing to @opencode-ai/opensearch
+# Contributing to @kagan-sh/opensearch
 
 Keep the published README end-user facing. Put local setup, source-based plugin loading, and maintainer workflow details here.
 
@@ -44,13 +44,35 @@ That runs:
 
 Acceptance tests are integration-heavy and boot a real OpenCode server process.
 
+## Docs
+
+Install docs dependencies:
+
+```bash
+python3 -m pip install -r requirements-docs.txt
+```
+
+Run the local docs server:
+
+```bash
+mkdocs serve
+```
+
+Build docs with strict link validation:
+
+```bash
+mkdocs build --strict
+```
+
 ## Release automation
 
 This repo uses `semantic-release` on `main`.
 
 - Prefer Conventional Commits for merge commits and direct commits to `main`
 - Run `bun run release:dry-run` locally if you want to preview the next release
-- npm publishing is configured for GitHub Actions trusted publishing; until npm OIDC is configured for the target package, release runs may stop at the publish step
+- npm publishing is configured for GitHub Actions trusted publishing via OIDC for `@kagan-sh/opensearch`
+- The npm package must be linked to this repository under the `kagan_sh` publisher account before the first release
+- Local `semantic-release --dry-run` still fails auth checks unless GitHub and npm credentials are present; the OIDC npm path is validated in GitHub Actions, not in a regular local shell
 
 ## Project structure
 

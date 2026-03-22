@@ -1,7 +1,15 @@
 {
-  "name": "@opencode-ai/opensearch",
+  "name": "@kagan-sh/opensearch",
   "version": "0.0.1",
   "description": "OpenCode plugin that combines session, web, and code search",
+  "homepage": "https://kagan-sh.github.io/opensearch/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kagan-sh/opensearch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kagan-sh/opensearch/issues"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,13 +32,15 @@
     "typecheck": "bun tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "docs:build": "mkdocs build --strict",
+    "docs:serve": "mkdocs serve",
     "check": "bun run typecheck && bun run test && bun run build",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@opencode-ai/plugin": "latest",
-    "@opencode-ai/sdk": "latest",
+    "@opencode-ai/plugin": "1.2.27",
+    "@opencode-ai/sdk": "1.2.27",
     "zod": "^3.24.0",
     "zod-to-json-schema": "^3.24.0"
   },
@@ -45,6 +55,8 @@
     "bun": ">=1.2.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
   }
 }

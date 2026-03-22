@@ -1,9 +1,9 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk";
 import {
-  ResultSchema,
   type RawResult,
-  type Result,
-  resultJsonSchema,
+  SynthesisSchema,
+  type Synthesis,
+  synthesisJsonSchema,
 } from "./schema";
 
 const PROMPT = `You are a synthesis engine for opensearch.
@@ -40,42 +40,20 @@ function parse(input: string) {
   }
 }
 
-function fallback(query: string, raw: RawResult[]): Result {
-  return {
-    answer: "Unable to synthesize structured answer. Returning raw evidence.",
-    confidence: "none",
-    evidence: [],
-    sources: raw.map((item) => ({
-      id: item.id,
-      type: item.type,
-      title: item.title,
-      snippet: item.snippet,
-      url: item.url,
-      relevance: Math.max(0, Math.min(1, item.relevance)),
-      timestamp: item.timestamp,
-    })),
-    followups: [`Refine: ${query}`, `Find contradictory sources for: ${query}`],
-    meta: {
-      query,
-      duration: 0,
-      sources_queried: 0,
-      sources_yielded: raw.length,
-    },
-  };
-}
-
 export async function synthesize(
   client: ReturnType<typeof createOpencodeClient>,
   directory: string,
   raw: RawResult[],
   query: string,
-): Promise<Result> {
+): Promise<Synthesis> {
   const made = await client.session.create({
     query: { directory },
     body: { title: "opensearch-synth" },
   });
   const id = made.data?.id;
-  if (!id) return fallback(query, raw);
+  if (!id) {
+    throw new Error("Unable to create a synthesis session.");
+  }
 
   const input = `${PROMPT}\n\nUser query:\n${query}\n\nSources:\n${raw
     .map(
@@ -94,7 +72,7 @@ export async function synthesize(
         parts: [{ type: "text" as const, text: input }],
         format: {
           type: "json_schema",
-          schema: resultJsonSchema(),
+          schema: synthesisJsonSchema(),
           retryCount: 2,
         },
       },
@@ -102,10 +80,14 @@ export async function synthesize(
 
     const msg = await client.session.prompt(req);
     const body = parse(text(msg.data?.parts ?? []));
-    if (!body) return fallback(query, raw);
+    if (!body) {
+      throw new Error("Synthesis returned no JSON output.");
+    }
 
-    const parsed = ResultSchema.safeParse(body);
-    if (!parsed.success) return fallback(query, raw);
+    const parsed = SynthesisSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new Error("Synthesis returned an invalid payload.");
+    }
     return parsed.data;
   } finally {
     await client.session
