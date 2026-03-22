@@ -5,7 +5,7 @@
   "homepage": "https://kagan-sh.github.io/opensearch/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kagan-sh/opensearch.git"
+    "url": "git+https://github.com/kagan-sh/opensearch.git"
   },
   "bugs": {
     "url": "https://github.com/kagan-sh/opensearch/issues"
