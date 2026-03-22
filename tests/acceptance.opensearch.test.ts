@@ -1,6 +1,5 @@
 import { createOpencodeClient } from "@opencode-ai/sdk";
 import { spawn } from "node:child_process";
-import { once } from "node:events";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -15,10 +14,13 @@ type State = {
   proc: ReturnType<typeof spawn>;
 };
 
+async function sleep(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function port() {
   return await new Promise<number>((resolve, reject) => {
     const srv = createServer();
-    srv.once("error", reject);
     srv.listen(0, "127.0.0.1", () => {
       const addr = srv.address();
       if (!addr || typeof addr === "string") {
@@ -44,6 +46,22 @@ async function wait(base: string) {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error("opencode server did not become ready");
+}
+
+async function stop(proc: State["proc"]) {
+  proc.kill();
+
+  for (const _ of Array.from({ length: 20 })) {
+    if (proc.exitCode !== null || proc.signalCode !== null) return;
+    await sleep(100);
+  }
+
+  proc.kill("SIGKILL");
+
+  for (const _ of Array.from({ length: 10 })) {
+    if (proc.exitCode !== null || proc.signalCode !== null) return;
+    await sleep(100);
+  }
 }
 
 async function boot(dir: string) {
@@ -93,12 +111,14 @@ let state: State | undefined;
 
 afterEach(async () => {
   if (!state) return;
-  state.proc.kill();
-  await Promise.race([
-    once(state.proc, "exit").catch(() => 0),
-    new Promise((resolve) => setTimeout(resolve, 2000)),
-  ]);
-  await rm(state.dir, { recursive: true, force: true });
+  await stop(state.proc);
+
+  await rm(state.dir, {
+    recursive: true,
+    force: true,
+    maxRetries: 10,
+    retryDelay: 100,
+  });
   state = undefined;
 });
 
