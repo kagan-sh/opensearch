@@ -70,7 +70,7 @@ This repo uses `semantic-release` on `main`.
 
 - Prefer Conventional Commits for merge commits and direct commits to `main`
 - Run `bun run release:dry-run` locally if you want to preview the next release
-- npm publishing is configured for GitHub Actions trusted publishing via OIDC for `@kagan-sh/opensearch`
+- npm publishing now uses GitHub Actions trusted publishing via OIDC for `@kagan-sh/opensearch`
 - The npm package must be linked to this repository under the `kagan_sh` publisher account before the first release
 - Local `semantic-release --dry-run` still fails auth checks unless GitHub and npm credentials are present; the OIDC npm path is validated in GitHub Actions, not in a regular local shell
 
@@ -95,7 +95,7 @@ This repo uses `semantic-release` on `main`.
 - CI workflow: `.github/workflows/ci.yml`
 - Release workflow: `.github/workflows/release.yml`
 - GitHub releases are automated with `semantic-release`
-- npm publishing is ready for trusted publishing via OIDC once the package is configured on npm
+- npm publishing is configured to publish through OIDC without a long-lived npm token
 
 ## Pull requests
 
