@@ -7,3 +7,10 @@ site/
 .env
 .env.*
 opencode.json
+.expo/
+.turbo/
+apps/api/.data/
+apps/api/dist/
+apps/mobile/dist/
+apps/web/dist/
+packages/*/dist/

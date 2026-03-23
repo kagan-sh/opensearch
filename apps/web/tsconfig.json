@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["vite/client", "@testing-library/jest-dom"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@opensearch/contracts": ["../../packages/contracts/src/index.ts"],
+      "@opensearch/sdk": ["../../packages/sdk/src/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

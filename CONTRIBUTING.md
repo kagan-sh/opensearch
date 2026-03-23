@@ -1,104 +1,79 @@
-# Contributing to @kagan-sh/opensearch
+# Contributing
 
-Keep the published README end-user facing. Put local setup, source-based plugin loading, and maintainer workflow details here.
+OpenSearch is a pnpm monorepo for privacy-oriented assistant search.
 
 ## Requirements
 
-- Bun 1.2+
-- Node 20+
-- OpenCode CLI (`opencode`)
+- Node 22+
+- pnpm 10+
 
-## Local setup
-
-```bash
-bun install
-npm install -g opencode-ai
-```
-
-## Run the plugin from source
-
-For local development, point `opencode.json` at the source entrypoint:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": ["file:///absolute/path/to/opensearch/src/index.ts"]
-}
-```
-
-This keeps the published package path in `README.md` while still giving contributors a zero-publish development loop.
-
-## Validate changes
-
-Run the full validation pipeline before opening a pull request:
+## Setup
 
 ```bash
-bun run check
+pnpm install
 ```
 
-That runs:
+## Local Development
 
-1. `bun run typecheck`
-2. `bun run test`
-3. `bun run build`
-
-Acceptance tests are integration-heavy and boot a real OpenCode server process.
-
-## Docs
-
-Install docs dependencies:
+API + web:
 
 ```bash
-python3 -m pip install -r requirements-docs.txt
+pnpm dev
 ```
 
-Run the local docs server:
+Mobile:
 
 ```bash
-mkdocs serve
+pnpm dev:mobile
 ```
 
-Build docs with strict link validation:
+Optional server-side web search:
 
 ```bash
-mkdocs build --strict
+SEARXNG_BASE_URL=http://localhost:8080 pnpm dev:api
 ```
 
-## Release automation
+## Validate Changes
 
-This repo uses `semantic-release` on `main`.
+```bash
+pnpm run ci
+```
 
-- Prefer Conventional Commits for merge commits and direct commits to `main`
-- Run `bun run release:dry-run` locally if you want to preview the next release
-- npm publishing now uses GitHub Actions trusted publishing via OIDC for `@kagan-sh/opensearch`
-- The npm package must be linked to this repository under the `kagan_sh` publisher account before the first release
-- Local `semantic-release --dry-run` still fails auth checks unless GitHub and npm credentials are present; the OIDC npm path is validated in GitHub Actions, not in a regular local shell
+## Project Structure
 
-## Project structure
+- `apps/api` standalone search API and SSE transport
+- `apps/web` Vite + shadcn + Jotai web client
+- `apps/mobile` Expo + Jotai native client
+- `packages/contracts` shared wire contracts and schemas
+- `packages/core` ranking, thread execution, answer generation
+- `packages/sources` datasource registry and adapters
+- `packages/sdk` typed client for web and mobile
+- `packages/prompts` answer-model prompts
+- `packages/testkit` fixtures and fake registries
 
-- `src/index.ts` plugin entrypoint, source selection, and response assembly
-- `src/schema.ts` zod schemas and JSON schema export
-- `src/sources/*` source adapters for session, web, and code search
-- `src/synth.ts` structured synthesis through `session.prompt`
-- `tests/*` vitest coverage for schema and end-to-end plugin behavior
-- `SKILL.md` optional skill guidance that nudges agent workflows toward `opensearch` for broad research tasks
+## Testing Policy
 
-## Testing policy
+- prefer behavior-first tests
+- keep package tests small and contract-driven
+- test API flows through HTTP/SSE behavior, not private helpers
+- test web/mobile through stores and visible UI outcomes
+- add a test when a behavior changes or a bug escapes
 
-- Prefer acceptance-first coverage for behavior changes
-- Test observable outcomes instead of internal wiring
-- Avoid tautological tests and unnecessary mocks
-- Mock only when the real contract cannot be exercised in runtime tests
+## Datasource Contribution Rules
 
-## Release workflow
+Datasource connectors are server-only.
 
-- CI workflow: `.github/workflows/ci.yml`
-- Release workflow: `.github/workflows/release.yml`
-- GitHub releases are automated with `semantic-release`
-- npm publishing is configured to publish through OIDC without a long-lived npm token
+- never move datasource credentials into web or mobile clients
+- add new connectors in `packages/sources`
+- expose only normalized search results through shared contracts
+- keep connector config explicit: `id`, `category`, `capabilities`, `credentialMode`
+- default to opt-in enablement for connectors that touch private systems
 
-## Pull requests
+## Architecture Rules
 
-- Keep changes small and focused
-- Add or update tests for behavior changes
-- Keep `README.md` user-facing and keep contributor workflow details in `CONTRIBUTING.md`
+- no Bun
+- no legacy aliases
+- no backward-compatibility shims
+- no dead code
+- keep clients thin over the shared SDK
+- keep privacy posture obvious in code and docs

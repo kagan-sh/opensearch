@@ -1,110 +1,120 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/mark-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/mark-light.svg">
-    <img alt="OpenSearch — evidence-backed search for OpenCode" src="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/mark-dark.svg" width="100%">
-  </picture>
-</p>
-<p align="center">
-  <a href="https://www.npmjs.com/package/@kagan-sh/opensearch"><img src="https://img.shields.io/npm/v/%40kagan-sh%2Fopensearch?style=for-the-badge" alt="npm"></a>
-  <a href="https://github.com/kagan-sh/opensearch/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/kagan-sh/opensearch/ci.yml?style=for-the-badge&label=CI" alt="CI"></a>
-  <a href="https://kagan-sh.github.io/opensearch/"><img src="https://img.shields.io/badge/docs-github%20pages-181717?style=for-the-badge&logo=github" alt="Docs"></a>
-  <a href="https://opensource.org/license/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://github.com/kagan-sh/opensearch/stargazers"><img src="https://img.shields.io/github/stars/kagan-sh/opensearch?style=for-the-badge" alt="Stars"></a>
-</p>
-<h3 align="center">
-  <a href="https://kagan-sh.github.io/opensearch/">Docs</a> ·
-  <a href="https://kagan-sh.github.io/opensearch/quickstart/">Quickstart</a> ·
-  <a href="https://kagan-sh.github.io/opensearch/guides/searxng/">SearXNG Setup</a> ·
-  <a href="https://kagan-sh.github.io/opensearch/reference/result-contract/">Reference</a> ·
-  <a href="https://raw.githubusercontent.com/kagan-sh/opensearch/main/SKILL.md">LLM Quick Reference</a>
-</h3>
+# OpenSearch
 
----
+OpenSearch is a privacy-oriented search stack for LLM assistants.
 
-`@kagan-sh/opensearch` is an evidence-backed search tool for AI coding agents. It searches the live web and public code in parallel, then returns structured JSON your agent can act on.
+Think `OpenCode`, but for evidence-backed search: a standalone API, a Vite web client, an Expo mobile client, and a server-side datasource registry that keeps secrets off the client.
 
-Works as a **Claude Code plugin**, a **standalone MCP server**, and an **OpenCode plugin**.
+## What It Is
 
-## Install
+- `apps/api` typed HTTP + SSE search backend
+- `apps/web` Vite + React + shadcn + Jotai answer interface
+- `apps/mobile` Expo + Expo Router + Jotai native client
+- `packages/*` shared contracts, core pipeline, datasource adapters, SDK, prompts, and testkit
 
-### Claude Code (plugin)
+The current alpha is optimized for local-first and self-hosted use:
 
-Install from the plugin directory for one-click setup with built-in skills and search command:
+- server-side datasource execution only
+- no client-side datasource credentials
+- built-in privacy-friendly web search via SearXNG
+- public code search via grep.app
+- thread-aware session history search inside the API
+
+## Quick Start
+
+Requirements:
+
+- Node 22+
+- pnpm 10+
+
+Install everything:
 
 ```bash
-/plugin install opensearch
+pnpm install
 ```
 
-Or install from a local checkout for development:
+Run the API and web app together:
 
 ```bash
-claude --plugin-dir ./plugin
+pnpm dev
 ```
 
-The plugin bundles the MCP server, a SKILL.md (so Claude knows when to search automatically), and a `/opensearch:search` command.
-
-### Claude Code (MCP — standalone)
-
-If you prefer a standalone MCP server (also works with Cursor, Windsurf, etc.):
+Run mobile:
 
 ```bash
-claude mcp add opensearch -- npx -y @kagan-sh/opensearch
+pnpm dev:mobile
 ```
 
-To enable web search via SearXNG:
+Optional web search backing:
 
 ```bash
-claude mcp add opensearch \
-  -e OPENSEARCH_WEB_URL=http://localhost:8080 \
-  -- npx -y @kagan-sh/opensearch
+SEARXNG_BASE_URL=http://localhost:8080 pnpm dev:api
 ```
 
-Or add it to `.mcp.json` in your project root:
+Default local endpoints:
 
-```json
-{
-  "mcpServers": {
-    "opensearch": {
-      "command": "npx",
-      "args": ["-y", "@kagan-sh/opensearch"],
-      "env": {
-        "OPENSEARCH_WEB_URL": "http://localhost:8080"
-      }
-    }
-  }
-}
+- web: `http://127.0.0.1:5173`
+- api: `http://127.0.0.1:3001`
+
+## Product Positioning
+
+OpenSearch is not a general chatbot shell.
+
+It is a search fabric for assistants that need:
+
+- cheap and privacy-aware retrieval
+- explicit sources and follow-ups
+- reusable search threads
+- third-party datasource extensibility
+- a small, inspectable, self-hostable core
+
+## Datasource Model
+
+Each datasource is a server-registered connector with:
+
+- `id`
+- `label`
+- `category`
+- `capabilities`
+- `credentialMode`
+
+Clients can request datasource ids, but only the server can execute them.
+
+Built-ins today:
+
+- `session-history`
+- `grep-app-code`
+- `searxng-web` when `SEARXNG_BASE_URL` is configured
+
+See `ARCHITECTURE.md` for the alpha-to-PMF security and extensibility model.
+
+## Validation
+
+```bash
+pnpm run ci
 ```
 
-See the [Claude Code install guide](https://kagan-sh.github.io/opensearch/guides/claude-code/) for full details.
+That runs:
 
-### OpenCode (plugin)
+1. `pnpm run typecheck`
+2. `pnpm run test`
+3. `pnpm run build`
 
-Add the plugin to `opencode.json`:
+## Monorepo Layout
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@kagan-sh/opensearch"]
-}
+```text
+apps/
+  api/
+  mobile/
+  web/
+packages/
+  contracts/
+  core/
+  prompts/
+  sdk/
+  sources/
+  testkit/
 ```
-
-OpenCode installs npm plugins automatically at startup.
-
-Full docs: **[kagan-sh.github.io/opensearch](https://kagan-sh.github.io/opensearch/)**. Web search uses a self-hosted `SearXNG` instance; setup lives in the docs.
 
 ## License
 
 [MIT](LICENSE)
-
----
-
-<p align="center">
-  <a href="https://www.star-history.com/#kagan-sh/opensearch&type=date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kagan-sh/opensearch&type=date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kagan-sh/opensearch&type=date" />
-      <img alt="Star History" src="https://api.star-history.com/svg?repos=kagan-sh/opensearch&type=date" width="600" />
-    </picture>
-  </a>
-</p>

@@ -1,0 +1,21 @@
+{
+  "name": "@opensearch/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opensearch/contracts": "workspace:*",
+    "@opensearch/core": "workspace:*",
+    "@opensearch/sdk": "workspace:*",
+    "@opensearch/sources": "workspace:*",
+    "@opensearch/testkit": "workspace:*"
+  }
+}

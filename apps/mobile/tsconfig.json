@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "expo-router/types",
+      "vitest/globals"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@opensearch/contracts": [
+        "../../packages/contracts/src/index.ts"
+      ],
+      "@opensearch/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@opensearch/prompts": [
+        "../../packages/prompts/src/index.ts"
+      ],
+      "@opensearch/sdk": [
+        "../../packages/sdk/src/index.ts"
+      ],
+      "@opensearch/sources": [
+        "../../packages/sources/src/index.ts"
+      ],
+      "@opensearch/testkit": [
+        "../../packages/testkit/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "app",
+    "src",
+    "expo-env.d.ts",
+    ".expo/types/**/*.ts"
+  ]
+}

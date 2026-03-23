@@ -1,74 +1,30 @@
 {
-  "name": "@kagan-sh/opensearch",
-  "version": "0.4.0",
-  "description": "OpenCode plugin that combines session, web, and code search",
+  "name": "opensearch",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Privacy-oriented search infrastructure for LLM assistants",
   "license": "MIT",
-  "homepage": "https://kagan-sh.github.io/opensearch/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kagan-sh/opensearch.git"
+  "packageManager": "pnpm@10.8.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/kagan-sh/opensearch/issues"
-  },
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "opensearch-mcp": "./dist/mcp.js"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./mcp": {
-      "types": "./dist/mcp.d.ts",
-      "import": "./dist/mcp.js",
-      "default": "./dist/mcp.js"
-    }
-  },
-  "files": [
-    "dist",
-    "plugin",
-    "README.md",
-    "CONTRIBUTING.md",
-    "SKILL.md",
-    "LICENSE"
-  ],
   "scripts": {
-    "mcp": "bun run src/mcp.ts",
-    "build": "bun tsc",
-    "typecheck": "bun tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "docs:build": "mkdocs build --strict",
-    "docs:serve": "mkdocs serve",
-    "check": "bun run typecheck && bun run test && bun run build",
-    "release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
-    "@opencode-ai/plugin": "1.2.27",
-    "@opencode-ai/sdk": "1.2.27",
-    "zod": "^3.24.0",
-    "zod-to-json-schema": "^3.24.0"
+    "dev": "pnpm --parallel --filter @opensearch/api --filter @opensearch/web dev",
+    "dev:api": "pnpm --filter @opensearch/api dev",
+    "dev:web": "pnpm --filter @opensearch/web dev",
+    "dev:mobile": "pnpm --filter @opensearch/mobile start",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "build:packages": "pnpm --filter @opensearch/contracts build && pnpm --filter @opensearch/prompts build && pnpm --filter @opensearch/sources build && pnpm --filter @opensearch/core build && pnpm --filter @opensearch/sdk build && pnpm --filter @opensearch/testkit build",
+    "build:apps": "pnpm --filter @opensearch/api build && pnpm --filter @opensearch/web build",
+    "build": "pnpm run build:packages && pnpm run build:apps",
+    "ci": "pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "devDependencies": {
-    "@types/bun": "1.3.11",
-    "conventional-changelog-conventionalcommits": "9.3.0",
-    "semantic-release": "25.0.3",
-    "typescript": "5.9.3",
-    "vitest": "4.1.0"
-  },
-  "peerDependencies": {
-    "bun": ">=1.2.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   }
 }

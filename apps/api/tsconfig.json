@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@opensearch/contracts": ["../../packages/contracts/src/index.ts"],
+      "@opensearch/core": ["../../packages/core/src/index.ts"],
+      "@opensearch/prompts": ["../../packages/prompts/src/index.ts"],
+      "@opensearch/sdk": ["../../packages/sdk/src/index.ts"],
+      "@opensearch/sources": ["../../packages/sources/src/index.ts"],
+      "@opensearch/testkit": ["../../packages/testkit/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "tests/**/*.ts"]
+}

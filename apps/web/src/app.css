@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --background: oklch(0.15 0.015 255);
+  --foreground: oklch(0.96 0.01 250);
+  --card: color-mix(in srgb, #0d1118 82%, #131c28 18%);
+  --card-foreground: oklch(0.95 0.01 250);
+  --popover: color-mix(in srgb, #0b1017 88%, #111827 12%);
+  --popover-foreground: oklch(0.96 0.01 250);
+  --primary: oklch(0.74 0.1 191);
+  --primary-foreground: oklch(0.14 0.014 248);
+  --secondary: color-mix(in srgb, #151b24 76%, #0d1219 24%);
+  --secondary-foreground: oklch(0.86 0.014 248);
+  --muted: color-mix(in srgb, #10161f 78%, #17202c 22%);
+  --muted-foreground: oklch(0.68 0.02 245);
+  --accent: oklch(0.72 0.08 191);
+  --accent-foreground: oklch(0.15 0.014 250);
+  --border: rgba(176, 203, 255, 0.12);
+  --input: rgba(16, 24, 33, 0.92);
+  --ring: oklch(0.72 0.08 191);
+  --destructive: oklch(0.63 0.19 25);
+  --radius: 1.5rem;
+  --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --font-sans: "Instrument Sans", "SF Pro Display", "Segoe UI", sans-serif;
+  --font-serif: "Instrument Serif", "Iowan Old Style", serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --radius-sm: calc(var(--radius) - 0.65rem);
+  --radius-md: calc(var(--radius) - 0.35rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.4rem);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background: var(--background);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top center, rgba(77, 185, 217, 0.16), transparent 26%),
+      radial-gradient(circle at 18% 18%, rgba(151, 103, 255, 0.09), transparent 22%),
+      radial-gradient(circle at 86% 12%, rgba(255, 255, 255, 0.06), transparent 18%),
+      linear-gradient(180deg, #070b11 0%, #0b1118 45%, #090d14 100%);
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 40%, transparent);
+    color: white;
+  }
+}
+
+@layer utilities {
+  .surface-border {
+    border: 1px solid var(--border);
+  }
+
+  .glass-panel {
+    background: linear-gradient(180deg, rgba(15, 20, 29, 0.88), rgba(11, 16, 24, 0.94));
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .noise-overlay {
+    position: relative;
+  }
+
+  .noise-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 0.6px, transparent 0.6px);
+    background-size: 18px 18px;
+    opacity: 0.06;
+    mix-blend-mode: screen;
+  }
+
+  .thread-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(109, 222, 234, 0.32) transparent;
+  }
+
+  .thread-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .thread-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(109, 222, 234, 0.22);
+    border-radius: 999px;
+  }
+
+  .progressive-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: progressive-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  .edge-fade {
+    mask-image: linear-gradient(to bottom, transparent, black 4%, black 96%, transparent);
+  }
+}
+
+@keyframes progressive-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

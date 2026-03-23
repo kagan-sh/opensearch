@@ -1,0 +1,45 @@
+{
+  "initiative": "universal-opensearch",
+  "goal": "Rewrite opensearch as a pnpm monorepo with a standalone API, a Vite web client built with shadcn and Jotai, and an Expo mobile client with no legacy plugin or MCP compatibility layers.",
+  "principles": [
+    "No Bun",
+    "No backwards compatibility",
+    "No legacy aliases",
+    "No dead code",
+    "Behavior-first tests",
+    "Shared contracts and SDK",
+    "Thin clients over a typed API"
+  ],
+  "phases": [
+    {
+      "id": "workspace",
+      "title": "Workspace and tooling cutover",
+      "status": "in_progress"
+    },
+    {
+      "id": "shared",
+      "title": "Shared packages: contracts, prompts, sources, core, sdk, testkit",
+      "status": "pending"
+    },
+    {
+      "id": "api",
+      "title": "HTTP and SSE API with persistent threads",
+      "status": "pending"
+    },
+    {
+      "id": "web",
+      "title": "Vite web app with shadcn, Jotai, and Perplexity-like UX",
+      "status": "pending"
+    },
+    {
+      "id": "mobile",
+      "title": "Expo mobile app with shared SDK and Jotai state",
+      "status": "pending"
+    },
+    {
+      "id": "cleanup",
+      "title": "Remove legacy code, refresh CI, run validation",
+      "status": "pending"
+    }
+  ]
+}
