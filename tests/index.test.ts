@@ -398,4 +398,117 @@ describe("opensearch tool", () => {
     });
     expect(body.sources[0]?.snippet).toContain("self-hosted SearXNG");
   });
+
+  it("retries web search with developer-focused fallback queries", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ results: [] }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          results: [
+            {
+              title: "GitHub issue result",
+              url: "https://github.com/example/repo/issues/1",
+              content: "Relevant developer-facing result.",
+            },
+          ],
+        }),
+      } as Response);
+    globalThis.fetch = fetchMock;
+
+    const hooks = await createHooks();
+    await hooks.config?.({
+      opensearch: {
+        sources: {
+          session: false,
+          web: { enabled: true, url: "https://search.example/" },
+          code: false,
+        },
+        depth: "quick",
+        synth: false,
+      },
+    } as never);
+
+    const tool = hooks.tool?.opensearch;
+    if (!tool) throw new Error("opensearch tool missing");
+
+    const output = await tool.execute(
+      { query: "opencode plugin hooks", sources: ["web"] },
+      createToolContext("/tmp/opensearch").context,
+    );
+    const body = JSON.parse(output) as {
+      status: string;
+      sources: Array<{ title: string; url?: string }>;
+      meta: { sources_yielded: number };
+    };
+
+    expect(body.status).toBe("raw");
+    expect(body.meta.sources_yielded).toBe(1);
+    expect(body.sources[0]).toMatchObject({
+      title: "GitHub issue result",
+      url: "https://github.com/example/repo/issues/1",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(decodeURIComponent(String(fetchMock.mock.calls[1]?.[0]))).toContain(
+      "site:github.com+opencode+plugin+hooks",
+    );
+  });
+
+  it("prefers owner-repo GitHub disambiguation for repo-like queries", async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ results: [] }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          results: [
+            {
+              title: "OpenSearch repository",
+              url: "https://github.com/kagan-sh/opensearch",
+              content: "The exact repository match.",
+            },
+          ],
+        }),
+      } as Response);
+    globalThis.fetch = fetchMock;
+
+    const hooks = await createHooks();
+    await hooks.config?.({
+      opensearch: {
+        sources: {
+          session: false,
+          web: { enabled: true, url: "https://search.example/" },
+          code: false,
+        },
+        depth: "quick",
+        synth: false,
+      },
+    } as never);
+
+    const tool = hooks.tool?.opensearch;
+    if (!tool) throw new Error("opensearch tool missing");
+
+    const output = await tool.execute(
+      { query: "kagan-sh/opensearch", sources: ["web"] },
+      createToolContext("/tmp/opensearch").context,
+    );
+    const body = JSON.parse(output) as {
+      status: string;
+      sources: Array<{ url?: string }>;
+    };
+
+    expect(body.status).toBe("raw");
+    expect(body.sources[0]?.url).toBe("https://github.com/kagan-sh/opensearch");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(decodeURIComponent(String(fetchMock.mock.calls[1]?.[0]))).toContain(
+      "site:github.com+kagan-sh/opensearch",
+    );
+  });
 });
