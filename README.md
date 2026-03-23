@@ -24,11 +24,29 @@
 
 `@kagan-sh/opensearch` is an evidence-backed search tool for AI coding agents. It searches the live web and public code in parallel, then returns structured JSON your agent can act on.
 
-Works as an **OpenCode plugin** and as a **Claude Code MCP server**.
+Works as a **Claude Code plugin**, a **standalone MCP server**, and an **OpenCode plugin**.
 
 ## Install
 
-### Claude Code (MCP)
+### Claude Code (plugin)
+
+Install from the plugin directory for one-click setup with built-in skills and search command:
+
+```bash
+/plugin install opensearch
+```
+
+Or install from a local checkout for development:
+
+```bash
+claude --plugin-dir ./plugin
+```
+
+The plugin bundles the MCP server, a SKILL.md (so Claude knows when to search automatically), and a `/opensearch:search` command.
+
+### Claude Code (MCP — standalone)
+
+If you prefer a standalone MCP server (also works with Cursor, Windsurf, etc.):
 
 ```bash
 claude mcp add opensearch -- npx -y @kagan-sh/opensearch

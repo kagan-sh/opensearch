@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "opensearch": {
+      "command": "npx",
+      "args": ["-y", "@kagan-sh/opensearch"],
+      "env": {
+        "OPENSEARCH_WEB_URL": ""
+      }
+    }
+  }
+}

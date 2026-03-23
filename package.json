@@ -1,6 +1,6 @@
 {
   "name": "@kagan-sh/opensearch",
-  "version": "0.0.1",
+  "version": "0.4.0",
   "description": "OpenCode plugin that combines session, web, and code search",
   "license": "MIT",
   "homepage": "https://kagan-sh.github.io/opensearch/",
@@ -31,6 +31,7 @@
   },
   "files": [
     "dist",
+    "plugin",
     "README.md",
     "CONTRIBUTING.md",
     "SKILL.md",
