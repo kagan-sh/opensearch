@@ -2,7 +2,7 @@
 name: opensearch
 description: Use OpenSearch for broad, evidence-backed investigation across session history, the web, and public code when a user asks to search, research, compare sources, or gather official docs and examples.
 license: MIT
-compatibility: Requires OpenCode with @kagan-sh/opensearch installed. The current web provider is SearXNG, so web results need OPENSEARCH_WEB_URL.
+compatibility: Works as an OpenCode plugin or a Claude Code MCP server. The web source requires a SearXNG instance and OPENSEARCH_WEB_URL. In Claude Code, only web and code sources are available.
 metadata:
   version: 0.0.1
 ---
@@ -42,7 +42,7 @@ Use this skill when the task is primarily about finding, comparing, and synthesi
 
 ## Source Selection Guide
 
-- `session` for prior decisions, earlier runs, and local conversation history
+- `session` for prior decisions, earlier runs, and local conversation history (OpenCode only)
 - `web` for official docs, changelogs, and current vendor guidance
 - `code` for public implementation examples and real usage patterns
 

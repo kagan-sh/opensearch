@@ -189,3 +189,35 @@ select {
 .footer-stars img {
   filter: grayscale(1) contrast(1.08);
 }
+
+/* --- table readability --- */
+
+.md-typeset table:not([class]) td code,
+.md-typeset table:not([class]) th code {
+  white-space: nowrap;
+}
+
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  padding: 0.65em 0.8em;
+  vertical-align: top;
+}
+
+.md-typeset table:not([class]) {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- admonition polish --- */
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-width: 1px;
+  border-left-width: 3px;
+}
+
+.md-typeset .admonition-title,
+.md-typeset summary {
+  font-weight: 500;
+}

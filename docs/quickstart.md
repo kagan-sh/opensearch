@@ -1,13 +1,19 @@
 ---
 title: Quickstart
-description: Install @kagan-sh/opensearch and run it from OpenCode.
+description: Install @kagan-sh/opensearch and run it from OpenCode or Claude Code.
 ---
 
 # Quickstart
 
 Board up. Search available. Under five minutes.
 
-## 1. Install the plugin
+!!! tip "Using Claude Code? One command is all you need."
+    ```bash
+    claude mcp add opensearch -- npx -y @kagan-sh/opensearch
+    ```
+    Full details in the [Claude Code install guide](guides/claude-code.md).
+
+## 1. Install the plugin (OpenCode)
 
 Add the package to `opencode.json`:
 
@@ -45,7 +51,7 @@ Good prompts:
 The tool accepts:
 
 - `query`
-- `sources?: ("session" | "web" | "code")[]`
+- `sources?: ("session" | "web" | "code")[]` (OpenCode: all three; Claude Code: `"web"` and `"code"` only)
 - `depth?: "quick" | "thorough"`
 
 Examples:
@@ -53,7 +59,7 @@ Examples:
 ```json
 {
   "query": "plugin loading order",
-  "sources": ["session", "code"],
+  "sources": ["code"],
   "depth": "quick"
 }
 ```
@@ -70,9 +76,9 @@ Examples:
 
 The response always includes an explicit `status`.
 
-- `ok` means synthesis succeeded
-- `raw` means synthesis was disabled
-- `raw_fallback` means source collection worked but synthesis failed
+- `ok` means synthesis succeeded (OpenCode only)
+- `raw` means raw results were returned
+- `raw_fallback` means source collection worked but synthesis failed (OpenCode only)
 - `no_sources` means nothing eligible could run
 - `no_results` means searches ran but returned no usable evidence
 

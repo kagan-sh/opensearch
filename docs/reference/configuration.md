@@ -5,7 +5,7 @@ description: Runtime configuration for @kagan-sh/opensearch.
 
 # Configuration
 
-OpenSearch is configured with environment variables and plugin config.
+OpenSearch is configured with environment variables. The OpenCode plugin also accepts plugin config in `opencode.json`.
 
 ## Environment variables
 
@@ -13,14 +13,17 @@ The current `web` provider is `SearXNG`.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `OPENSEARCH_SYNTH` | `true` | Enable structured synthesis after collecting raw results |
+| `OPENSEARCH_WEB_URL` | unset | Base URL for the `web` source SearXNG instance |
+| `OPENSEARCH_SOURCE_WEB` | `true` | Enable web search (requires URL above) |
+| `OPENSEARCH_SOURCE_CODE` | `true` | Enable public code search |
 | `OPENSEARCH_DEPTH` | `quick` | Default search depth |
 | `OPENSEARCH_SOURCE_SESSION` | `true` | Enable session-history search |
-| `OPENSEARCH_SOURCE_WEB` | `true` | Enable web search when a SearXNG URL is present |
-| `OPENSEARCH_SOURCE_CODE` | `true` | Enable public code search |
-| `OPENSEARCH_WEB_URL` | unset | Base URL for the `web` source SearXNG instance |
+| `OPENSEARCH_SYNTH` | `true` | Enable structured synthesis after collecting raw results |
 
-## Plugin config shape
+!!! note "Defaults differ in Claude Code MCP mode"
+    `OPENSEARCH_SOURCE_SESSION` and `OPENSEARCH_SYNTH` are always `false` in MCP mode because they depend on the OpenCode runtime. Claude Code synthesizes results natively. All other defaults are the same.
+
+## OpenCode plugin config shape
 
 ```json
 {
@@ -36,9 +39,30 @@ The current `web` provider is `SearXNG`.
 }
 ```
 
+## Claude Code MCP config
+
+Environment variables are passed through the MCP server definition:
+
+```json
+{
+  "mcpServers": {
+    "opensearch": {
+      "command": "npx",
+      "args": ["-y", "@kagan-sh/opensearch"],
+      "env": {
+        "OPENSEARCH_WEB_URL": "http://localhost:8080",
+        "OPENSEARCH_DEPTH": "quick"
+      }
+    }
+  }
+}
+```
+
+See the [Claude Code install guide](../guides/claude-code.md) for setup instructions.
+
 ## Availability rules
 
-- `session` is available when enabled
+- `session` is available when enabled (OpenCode only)
 - `code` is available when enabled
 - `web` is available only when enabled **and** `OPENSEARCH_WEB_URL` exists
 
@@ -48,4 +72,4 @@ If you request a source that is unavailable, the tool reports it explicitly in `
 
 Invalid plugin config is not ignored.
 
-The plugin now fails explicitly so bad config does not silently degrade behavior.
+The plugin fails explicitly so bad config does not silently degrade behavior.

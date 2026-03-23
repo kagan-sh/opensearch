@@ -13,6 +13,9 @@ Searches OpenCode session titles and transcript text for relevant prior work.
 
 Use it when the answer may already exist in local agent history.
 
+!!! note
+    The session source is only available in OpenCode. It is not available in Claude Code MCP mode.
+
 ### Web
 
 Uses `SearXNG` for live web search.

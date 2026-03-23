@@ -22,9 +22,45 @@
 
 ---
 
-`@kagan-sh/opensearch` is an OpenCode plugin for broad investigation. It searches session history, the live web, and public code in parallel, then returns a structured evidence-backed response your agent can act on.
+`@kagan-sh/opensearch` is an evidence-backed search tool for AI coding agents. It searches the live web and public code in parallel, then returns structured JSON your agent can act on.
+
+Works as an **OpenCode plugin** and as a **Claude Code MCP server**.
 
 ## Install
+
+### Claude Code (MCP)
+
+```bash
+claude mcp add opensearch -- npx -y @kagan-sh/opensearch
+```
+
+To enable web search via SearXNG:
+
+```bash
+claude mcp add opensearch \
+  -e OPENSEARCH_WEB_URL=http://localhost:8080 \
+  -- npx -y @kagan-sh/opensearch
+```
+
+Or add it to `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "opensearch": {
+      "command": "npx",
+      "args": ["-y", "@kagan-sh/opensearch"],
+      "env": {
+        "OPENSEARCH_WEB_URL": "http://localhost:8080"
+      }
+    }
+  }
+}
+```
+
+See the [Claude Code install guide](https://kagan-sh.github.io/opensearch/guides/claude-code/) for full details.
+
+### OpenCode (plugin)
 
 Add the plugin to `opencode.json`:
 

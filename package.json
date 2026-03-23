@@ -14,11 +14,19 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "opensearch-mcp": "./dist/mcp.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js",
+      "default": "./dist/mcp.js"
     }
   },
   "files": [
@@ -29,6 +37,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "mcp": "bun run src/mcp.ts",
     "build": "bun tsc",
     "typecheck": "bun tsc --noEmit",
     "test": "vitest run",
@@ -40,6 +49,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@opencode-ai/plugin": "1.2.27",
     "@opencode-ai/sdk": "1.2.27",
     "zod": "^3.24.0",

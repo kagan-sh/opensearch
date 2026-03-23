@@ -5,31 +5,32 @@ description: Concise docs for using and contributing to @kagan-sh/opensearch.
 
 # OpenSearch
 
-`@kagan-sh/opensearch` is a small OpenCode plugin for broad investigation.
+`@kagan-sh/opensearch` is an evidence-backed search tool for AI coding agents.
 
-It searches three evidence surfaces in parallel:
-
-- session history
-- the live web
-- public code
-
-Then it returns structured JSON your agent can act on.
+It searches the live web and public code in parallel, then returns structured JSON your agent can act on. Works as an **OpenCode plugin** and as a **Claude Code MCP server**.
 
 - Docs: <https://kagan-sh.github.io/opensearch/>
 - Repo: <https://github.com/kagan-sh/opensearch>
 
-## Start here
+## Get started
 
-| Goal | Page |
+| Runtime | Install guide |
 | --- | --- |
-| Install and run your first search | [Quickstart](quickstart.md) |
-| Configure a SearXNG instance for web search | [SearXNG setup](guides/searxng.md) |
-| Configure sources, depth, and synthesis | [Configuration](reference/configuration.md) |
-| Understand the JSON response | [Result contract](reference/result-contract.md) |
-| Give an LLM the direct skill reference | [LLM quick reference](https://raw.githubusercontent.com/kagan-sh/opensearch/main/SKILL.md) |
-| See what sources ship today | [Sources and extension status](reference/sources.md) |
-| Work on the repo | [Contributing](guides/contributing.md) |
-| Propose a feature or new datasource | [Feature requests](guides/feature-requests.md) |
+| **Claude Code** (MCP server) | [Claude Code guide](guides/claude-code.md) |
+| **OpenCode** (plugin) | [Quickstart](quickstart.md) |
+
+Both paths need a [SearXNG instance](guides/searxng.md) for web search. Code search works out of the box.
+
+## Reference
+
+| Topic | Page |
+| --- | --- |
+| Environment variables and config shapes | [Configuration](reference/configuration.md) |
+| JSON response shape | [Result contract](reference/result-contract.md) |
+| Built-in sources and extension status | [Sources](reference/sources.md) |
+| LLM skill prompt | [SKILL.md](https://raw.githubusercontent.com/kagan-sh/opensearch/main/SKILL.md) |
+| Contributing | [Contributing](guides/contributing.md) |
+| Feature requests | [Feature requests](guides/feature-requests.md) |
 
 ## What it is good at
 

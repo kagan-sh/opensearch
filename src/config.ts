@@ -50,6 +50,29 @@ export function defaultConfig(): Config {
   };
 }
 
+export function mcpDefaultConfig(): Config {
+  return {
+    sources: {
+      session: false,
+      web: {
+        enabled: parseBoolean(
+          "OPENSEARCH_SOURCE_WEB",
+          process.env.OPENSEARCH_SOURCE_WEB,
+          true,
+        ),
+        url: process.env.OPENSEARCH_WEB_URL,
+      },
+      code: parseBoolean(
+        "OPENSEARCH_SOURCE_CODE",
+        process.env.OPENSEARCH_SOURCE_CODE,
+        true,
+      ),
+    },
+    depth: parseDepth(process.env.OPENSEARCH_DEPTH),
+    synth: false,
+  };
+}
+
 export function parsePluginConfig(input: unknown): Config | undefined {
   if (!input || typeof input !== "object" || !("opensearch" in input)) {
     return undefined;

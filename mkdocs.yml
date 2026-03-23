@@ -66,6 +66,7 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Guides:
+      - Claude Code: guides/claude-code.md
       - SearXNG setup: guides/searxng.md
       - Contributing: guides/contributing.md
       - Feature requests: guides/feature-requests.md

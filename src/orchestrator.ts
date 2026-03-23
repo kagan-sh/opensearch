@@ -11,6 +11,7 @@ import type {
 } from "./schema";
 import { searchCode } from "./sources/code";
 import { searchSessions } from "./sources/session";
+import { failure } from "./sources/shared";
 import { searchWeb } from "./sources/web";
 
 function clampUnit(value: number) {
@@ -70,7 +71,7 @@ function createResult(input: {
 }
 
 export async function runSourceSearches(input: {
-  client: ReturnType<typeof createOpencodeClient>;
+  client?: ReturnType<typeof createOpencodeClient>;
   directory: string;
   config: Config;
   query: string;
@@ -80,6 +81,9 @@ export async function runSourceSearches(input: {
   const outcomes = await Promise.all(
     input.sources.map((source) => {
       if (source === "session") {
+        if (!input.client) {
+          return failure("session", "unavailable", "Session search requires the OpenCode runtime.");
+        }
         return searchSessions(
           input.client,
           input.directory,
