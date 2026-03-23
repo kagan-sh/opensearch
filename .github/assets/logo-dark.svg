@@ -1,21 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-labelledby="title desc">
-  <title id="title">OpenSearch logo</title>
-  <desc id="desc">Terminal-styled ASCII logo for OpenSearch.</desc>
-  <rect width="1200" height="360" rx="28" fill="#0d1117"/>
-  <rect x="20" y="20" width="1160" height="320" rx="20" fill="#111827" stroke="#30363d" stroke-width="2"/>
-  <circle cx="64" cy="58" r="10" fill="#ff5f56"/>
-  <circle cx="96" cy="58" r="10" fill="#ffbd2e"/>
-  <circle cx="128" cy="58" r="10" fill="#27c93f"/>
-  <text x="170" y="67" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">$ opensearch --gather session,web,code</text>
-  <text x="72" y="136" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve">   ____                        _____                      _     </text>
-  <text x="72" y="172" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve">  / __ \____  ___  ____      / ___/___  ____ ___________/ /_    </text>
-  <text x="72" y="208" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve"> / / / / __ \/ _ \/ __ \____\\__ \/ _ \/ __ `/ ___/ ___/ __ \   </text>
-  <text x="72" y="244" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve">/ /_/ / /_/ /  __/ / / /_____/__/ /  __/ /_/ / /  / /__/ / / /   </text>
-  <text x="72" y="280" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve">\____/ .___/\___/_/ /_/     /____/\___/\__,_/_/   \___/_/ /_/    </text>
-  <text x="72" y="316" fill="#58a6ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="32" xml:space="preserve">     /_/                                                              </text>
-  <text x="822" y="170" fill="#e6edf3" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">evidence-backed search</text>
-  <text x="822" y="206" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">session.history()</text>
-  <text x="822" y="238" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">web.search()</text>
-  <text x="822" y="270" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">code.examples()</text>
-  <text x="822" y="302" fill="#3fb950" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">status: ok</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" width="1600" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSearch</title>
+  <desc id="desc">Static terminal-styled ASCII OpenSearch logo.</desc>
+  <defs>
+    <style>
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-variant-ligatures: none;
+      }
+      .bg { fill: #050608; }
+      .panel {
+        fill: #0b0d10;
+        stroke: #202734;
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+      }
+      .titlebar { fill: #0a1018; }
+      .divider { stroke: #1b222d; stroke-width: 1; vector-effect: non-scaling-stroke; }
+      .dim { fill: #7d8793; }
+      .mark { fill: #ffffff; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="420" rx="30"/>
+  <rect class="panel" x="22" y="22" width="1556" height="376" rx="22"/>
+  <rect class="titlebar" x="22" y="22" width="1556" height="56" rx="22"/>
+  <rect class="titlebar" x="22" y="56" width="1556" height="22"/>
+  <line class="divider" x1="22" y1="78" x2="1578" y2="78"/>
+
+  <circle cx="58" cy="50" r="8" fill="#ff5f56"/>
+  <circle cx="84" cy="50" r="8" fill="#ffbd2e"/>
+  <circle cx="110" cy="50" r="8" fill="#27c93f"/>
+
+  <text class="mono dim" x="800" y="56" font-size="18" text-anchor="middle">opensearch</text>
+
+  <g class="mono mark" font-size="24">
+    <text x="78" y="132" xml:space="preserve"> ________  ________  _______   ________   ________  _______   ________  ________  ________  ___  ___     </text>
+    <text x="78" y="166" xml:space="preserve">|\   __  \|\   __  \|\  ___ \ |\   ___  \|\   ____\|\  ___ \ |\   __  \|\   __  \|\   ____\|\  \|\  \    </text>
+    <text x="78" y="200" xml:space="preserve">\ \  \|\  \ \  \|\  \ \   __/|\ \  \\ \  \ \  \___|\ \   __/|\ \  \|\  \ \  \|\  \ \  \___|\ \  \\\  \   </text>
+    <text x="78" y="234" xml:space="preserve"> \ \  \\\  \ \   ____\ \  \_|/_\ \  \\ \  \ \_____  \ \  \_|/_\ \   __  \ \   _  _\ \  \    \ \   __  \  </text>
+    <text x="78" y="268" xml:space="preserve">  \ \  \\\  \ \  \___|\ \  \_|\ \ \  \\ \  \|____|\  \ \  \_|\ \ \  \ \  \ \  \\  \\ \  \____\ \  \ \  \ </text>
+    <text x="78" y="302" xml:space="preserve">   \ \_______\ \__\    \ \_______\ \__\\ \__\____\_\  \ \_______\ \__\ \__\ \__\\ _\\ \_______\ \__\ \__\</text>
+    <text x="78" y="336" xml:space="preserve">    \|_______|\|__|     \|_______|\|__| \|__|\_________\|_______|\|__|\|__|\|__|\|__|\|_______|\|__|\|__|</text>
+    <text x="78" y="370" xml:space="preserve">                                            \|_________|                                                </text>
+  </g>
 </svg>

@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/logo-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/logo-light.svg">
-    <img alt="OpenSearch — evidence-backed search for OpenCode" src="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/logo-dark.svg" width="100%">
+    <img alt="OpenSearch — evidence-backed search for OpenCode" src="https://raw.githubusercontent.com/kagan-sh/opensearch/main/.github/assets/logo-light.svg" width="100%">
   </picture>
 </p>
 <p align="center">
@@ -15,7 +15,7 @@
   <a href="https://kagan-sh.github.io/opensearch/">Docs</a> ·
   <a href="https://kagan-sh.github.io/opensearch/quickstart/">Quickstart</a> ·
   <a href="https://kagan-sh.github.io/opensearch/reference/result-contract/">Result Contract</a> ·
-  <a href="https://github.com/kagan-sh/opensearch/issues/new?template=feature-request.yml">Feature Requests</a>
+  <a href="https://kagan-sh.github.io/opensearch/guides/feature-requests/">Feature Requests</a>
 </h3>
 
 ---
@@ -75,7 +75,7 @@ Invalid plugin config is reported explicitly instead of being ignored.
 
 ## Contributing
 
-For local source development, validation commands, and release workflow details, see `CONTRIBUTING.md`.
+For local source development, validation commands, and release workflow details, see <https://kagan-sh.github.io/opensearch/guides/contributing/>.
 
 ## Documentation
 
