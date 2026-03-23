@@ -85,7 +85,7 @@ describe("opensearch tool", () => {
     expect(body.meta.sources_yielded).toBe(0);
     expect(body.meta.sources_unavailable).toEqual(["session", "web", "code"]);
     expect(runtime.calls[runtime.calls.length - 1]?.title).toBe(
-      "OpenSearch · unavailable",
+      "OpenSearch // unavailable",
     );
   });
 
@@ -187,12 +187,15 @@ describe("opensearch tool", () => {
       completed,
     );
 
-    expect(completed.title).toBe("OpenSearch · 3 raw results");
+    expect(completed.title).toBe("OpenSearch // 3 raw results");
     expect(completed.metadata).toMatchObject({
       brand: "OpenSearch",
+      brand_tagline: "evidence-backed search",
+      brand_origin: "@kagan-sh/opensearch",
       phase: "completed",
       depth: "thorough",
       source_summary: "web + code",
+      source_badges: ["WEB", "CODE"],
       status: "raw",
       duration_ms: 42,
       sources_requested: 2,

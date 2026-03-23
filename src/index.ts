@@ -19,6 +19,18 @@ import {
 import { synthesize } from "./synth";
 
 const BRAND = "OpenSearch";
+const TAGLINE = "evidence-backed search";
+
+function sourceBadge(source: SourceId) {
+  if (source === "session") return "SESSION";
+  if (source === "web") return "WEB";
+  return "CODE";
+}
+
+function sourceBadges(sources: SourceId[]) {
+  if (sources.length === 0) return ["OFFLINE"];
+  return sources.map(sourceBadge);
+}
 
 function serialize(result: Result) {
   return JSON.stringify(result, null, 2);
@@ -37,17 +49,17 @@ function describeSources(sources: SourceId[]) {
 }
 
 function runningTitle(sources: SourceId[]) {
-  return `${BRAND} · searching ${describeSources(sources)}`;
+  return `${BRAND} // scanning ${describeSources(sources)}`;
 }
 
 function doneTitle(result: Result) {
-  if (result.status === "no_sources") return `${BRAND} · unavailable`;
-  if (result.status === "no_results") return `${BRAND} · no matches`;
+  if (result.status === "no_sources") return `${BRAND} // unavailable`;
+  if (result.status === "no_results") return `${BRAND} // no matches`;
   if (result.status === "raw") {
-    return `${BRAND} · ${result.meta.sources_yielded} raw result${result.meta.sources_yielded === 1 ? "" : "s"}`;
+    return `${BRAND} // ${result.meta.sources_yielded} raw result${result.meta.sources_yielded === 1 ? "" : "s"}`;
   }
-  if (result.status === "raw_fallback") return `${BRAND} · evidence fallback`;
-  return `${BRAND} · ${result.meta.sources_yielded} result${result.meta.sources_yielded === 1 ? "" : "s"}`;
+  if (result.status === "raw_fallback") return `${BRAND} // evidence fallback`;
+  return `${BRAND} // ${result.meta.sources_yielded} result${result.meta.sources_yielded === 1 ? "" : "s"}`;
 }
 
 function toolMetadata(input: {
@@ -59,11 +71,15 @@ function toolMetadata(input: {
 }) {
   return {
     brand: BRAND,
+    brand_tagline: TAGLINE,
+    brand_origin: "@kagan-sh/opensearch",
+    brand_surface: "plugin",
     phase: input.phase,
     query: previewQuery(input.query),
     depth: input.depth,
     sources: input.sources,
     source_summary: describeSources(input.sources),
+    source_badges: sourceBadges(input.sources),
     ...(input.result
       ? {
           status: input.result.status,
@@ -107,7 +123,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
     "tool.definition": async (input, output) => {
       if (input.toolID !== "opensearch") return;
       output.description =
-        "OpenSearch: use for broad investigation when the user asks to search, compare evidence, gather official docs, or combine session, web, and code results.";
+        "OpenSearch // evidence-backed search across session history, SearXNG web search, and public code. Use it for broad investigation, comparison, docs gathering, and cross-source research.";
     },
     "tool.execute.after": async (input, output) => {
       if (input.tool !== "opensearch") return;
@@ -135,7 +151,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
     tool: {
       opensearch: tool({
         description:
-          "Universal intelligent search. Queries session history, web, and code in parallel. Returns structured evidence-backed answer.",
+          "OpenSearch // evidence-backed search. Queries session history, SearXNG web search, and public code in parallel, then returns a structured answer with explicit status and source metadata.",
         args: {
           query: tool.schema.string().describe("What to search for"),
           sources: tool.schema
@@ -215,7 +231,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
 
           if (cfg.synth) {
             context.metadata({
-              title: `${BRAND} · synthesizing evidence`,
+              title: `${BRAND} // assembling evidence`,
               metadata: {
                 ...toolMetadata({
                   phase: "synthesizing",
@@ -224,6 +240,7 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
                   sources: resolved.sources,
                 }),
                 raw_results: search.raw.length,
+                status_note: "assembling evidence",
               },
             });
 
