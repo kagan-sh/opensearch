@@ -337,4 +337,62 @@ describe("opensearch tool", () => {
     expect(body.sources).toHaveLength(1);
     expect(body.meta.sources_yielded).toBe(1);
   });
+
+  it("returns raw SearXNG web results when configured", async () => {
+    globalThis.fetch = vi.fn<typeof fetch>().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: [
+          {
+            title: "SearXNG result",
+            url: "https://example.com/result",
+            content: "OpenSearch can use a self-hosted SearXNG instance.",
+            publishedDate: "2026-03-23T00:00:00Z",
+          },
+        ],
+      }),
+    } as Response);
+
+    const hooks = await createHooks();
+    await hooks.config?.({
+      opensearch: {
+        sources: {
+          session: false,
+          web: { enabled: true, url: "https://search.example/" },
+          code: false,
+        },
+        depth: "quick",
+        synth: false,
+      },
+    } as never);
+
+    const tool = hooks.tool?.opensearch;
+    if (!tool) throw new Error("opensearch tool missing");
+
+    const output = await tool.execute(
+      { query: "oss search", sources: ["web"] },
+      createToolContext("/tmp/opensearch").context,
+    );
+    const body = JSON.parse(output) as {
+      status: string;
+      sources: Array<{
+        title: string;
+        url?: string;
+        snippet: string;
+      }>;
+      meta: {
+        sources_queried: number;
+        sources_yielded: number;
+      };
+    };
+
+    expect(body.status).toBe("raw");
+    expect(body.meta.sources_queried).toBe(1);
+    expect(body.meta.sources_yielded).toBe(1);
+    expect(body.sources[0]).toMatchObject({
+      title: "SearXNG result",
+      url: "https://example.com/result",
+    });
+    expect(body.sources[0]?.snippet).toContain("self-hosted SearXNG");
+  });
 });

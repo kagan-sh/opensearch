@@ -91,7 +91,7 @@ export const ConfigSchema = z
         web: z
           .object({
             enabled: z.boolean(),
-            key: z.string().optional(),
+            url: z.string().url().optional(),
           })
           .strict(),
         code: z.boolean(),

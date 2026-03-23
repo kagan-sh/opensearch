@@ -89,7 +89,7 @@ export async function runSourceSearches(input: {
       }
 
       if (source === "web") {
-        return searchWeb(input.query, input.config.sources.web.key, input.depth);
+        return searchWeb(input.query, input.config.sources.web.url, input.depth);
       }
 
       return searchCode(input.query, input.depth);
@@ -118,7 +118,7 @@ export function noSourcesResult(input: {
     sources: [],
     followups: [
       "Enable at least one search source in opensearch config",
-      "Set OPENSEARCH_WEB_KEY or EXA_API_KEY to enable web search",
+      "Set OPENSEARCH_WEB_URL to enable web search",
     ],
     meta: resultMeta({
       query: input.query,

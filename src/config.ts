@@ -37,7 +37,7 @@ export function defaultConfig(): Config {
           process.env.OPENSEARCH_SOURCE_WEB,
           true,
         ),
-        key: process.env.OPENSEARCH_WEB_KEY ?? process.env.EXA_API_KEY,
+        url: process.env.OPENSEARCH_WEB_URL,
       },
       code: parseBoolean(
         "OPENSEARCH_SOURCE_CODE",
@@ -67,7 +67,7 @@ export function parsePluginConfig(input: unknown): Config | undefined {
 export function isSourceAvailable(config: Config, source: SourceId) {
   if (source === "session") return config.sources.session;
   if (source === "web") {
-    return config.sources.web.enabled && Boolean(config.sources.web.key);
+    return config.sources.web.enabled && Boolean(config.sources.web.url);
   }
   return config.sources.code;
 }
