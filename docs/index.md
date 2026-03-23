@@ -26,8 +26,8 @@ Then it returns structured JSON your agent can act on.
 | Configure sources, depth, and synthesis | [Configuration](reference/configuration.md) |
 | Understand the JSON response | [Result contract](reference/result-contract.md) |
 | See what sources ship today | [Sources and extension status](reference/sources.md) |
-| Work on the repo | [Contributing](contributing.md) |
-| Propose a feature or new datasource | [Feature requests](feature-requests.md) |
+| Work on the repo | [Contributing](guides/contributing.md) |
+| Propose a feature or new datasource | [Feature requests](guides/feature-requests.md) |
 
 ## What it is good at
 

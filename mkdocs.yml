@@ -10,17 +10,44 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  icon:
+    repo: fontawesome/brands/github
   font: false
+  palette:
+    scheme: slate
+    primary: custom
+    accent: custom
   features:
+    - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.footer
     - search.highlight
     - search.suggest
     - content.code.copy
     - content.action.edit
 
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/kagan-sh/opensearch
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/@kagan-sh/opensearch
+  generator: false
+
+copyright: >
+  Released under the <a href="https://github.com/kagan-sh/opensearch/blob/main/LICENSE" target="_blank">MIT License</a>.
+  <span class="footer-stars"><a href="https://github.com/kagan-sh/opensearch/stargazers" target="_blank"><img alt="GitHub stars" src="https://img.shields.io/github/stars/kagan-sh/opensearch?style=social"></a></span>
+
 plugins:
   - search
+  - redirects:
+      redirect_maps:
+        contributing.md: guides/contributing.md
+        feature-requests.md: guides/feature-requests.md
 
 markdown_extensions:
   - admonition
@@ -37,9 +64,10 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
+  - Guides:
+      - Contributing: guides/contributing.md
+      - Feature requests: guides/feature-requests.md
   - Reference:
       - Configuration: reference/configuration.md
       - Result contract: reference/result-contract.md
       - Sources and extension status: reference/sources.md
-  - Contributing: contributing.md
-  - Feature requests: feature-requests.md

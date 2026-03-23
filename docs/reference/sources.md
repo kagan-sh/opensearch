@@ -47,4 +47,4 @@ If you want OpenSearch to grow, high-value candidates are:
 - issue trackers such as Jira or Linear
 - team knowledge bases such as Notion or Confluence
 
-If you want one of these, use the [feature request flow](../feature-requests.md).
+If you want one of these, use the [feature request flow](../guides/feature-requests.md).
