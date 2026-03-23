@@ -48,6 +48,7 @@ plugins:
       redirect_maps:
         contributing.md: guides/contributing.md
         feature-requests.md: guides/feature-requests.md
+        guides/searxng-setup.md: guides/searxng.md
 
 markdown_extensions:
   - admonition
@@ -65,6 +66,7 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Guides:
+      - SearXNG setup: guides/searxng.md
       - Contributing: guides/contributing.md
       - Feature requests: guides/feature-requests.md
   - Reference:
