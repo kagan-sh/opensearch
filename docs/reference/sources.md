@@ -15,9 +15,9 @@ Use it when the answer may already exist in local agent history.
 
 ### Web
 
-Uses Exa for live web search.
+Uses `SearXNG` for live web search.
 
-Use it for official docs, announcements, changelogs, and current external guidance.
+Use it for official docs, announcements, changelogs, and current external guidance. Self-hosting is recommended; many public instances disable `format=json` or rate-limit automated traffic.
 
 ### Code
 

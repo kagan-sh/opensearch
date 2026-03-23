@@ -9,15 +9,16 @@ OpenSearch is configured with environment variables and plugin config.
 
 ## Environment variables
 
+The current `web` provider is `SearXNG`.
+
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `OPENSEARCH_SYNTH` | `true` | Enable structured synthesis after collecting raw results |
 | `OPENSEARCH_DEPTH` | `quick` | Default search depth |
 | `OPENSEARCH_SOURCE_SESSION` | `true` | Enable session-history search |
-| `OPENSEARCH_SOURCE_WEB` | `true` | Enable web search when a key is present |
+| `OPENSEARCH_SOURCE_WEB` | `true` | Enable web search when a SearXNG URL is present |
 | `OPENSEARCH_SOURCE_CODE` | `true` | Enable public code search |
-| `OPENSEARCH_WEB_KEY` | unset | Exa API key for web search |
-| `EXA_API_KEY` | unset | Fallback Exa API key |
+| `OPENSEARCH_WEB_URL` | unset | Base URL for the `web` source SearXNG instance |
 
 ## Plugin config shape
 
@@ -26,7 +27,7 @@ OpenSearch is configured with environment variables and plugin config.
   "opensearch": {
     "sources": {
       "session": true,
-      "web": { "enabled": true, "key": "..." },
+      "web": { "enabled": true, "url": "http://localhost:8080" },
       "code": true
     },
     "depth": "quick",
@@ -39,7 +40,7 @@ OpenSearch is configured with environment variables and plugin config.
 
 - `session` is available when enabled
 - `code` is available when enabled
-- `web` is available only when enabled **and** a key exists
+- `web` is available only when enabled **and** `OPENSEARCH_WEB_URL` exists
 
 If you request a source that is unavailable, the tool reports it explicitly in `meta.sources_unavailable`.
 

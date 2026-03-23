@@ -22,13 +22,13 @@ OpenCode installs npm plugins automatically at startup.
 
 ## 2. Enable optional web search
 
-Web search needs an Exa API key.
+The `web` source uses `SearXNG`, so web search needs a SearXNG instance with `format=json` enabled.
 
 ```bash
-export OPENSEARCH_WEB_KEY="your_exa_key"
+export OPENSEARCH_WEB_URL="http://localhost:8080"
 ```
 
-`OPENSEARCH_WEB_KEY` takes precedence over `EXA_API_KEY`.
+See [SearXNG setup](guides/searxng.md) for the exact instance requirements.
 
 ## 3. Use it when the task is broad
 
@@ -37,7 +37,7 @@ Reach for `opensearch` when you need to search, compare evidence, gather officia
 Good prompts:
 
 - "Search how this repo handles plugin loading and compare it with official docs"
-- "Look into rate limiting patterns for Exa and grep.app"
+- "Look into rate limiting patterns for SearXNG and grep.app"
 - "Gather evidence for how source adapters should be extended"
 
 ## 4. Narrow the search when needed
