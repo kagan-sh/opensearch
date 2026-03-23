@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" width="1600" height="420" role="img" aria-labelledby="title desc">
   <title id="title">OpenSearch</title>
-  <desc id="desc">Static terminal-styled ASCII OpenSearch logo.</desc>
+  <desc id="desc">Centered ASCII OpenSearch logo on a light background.</desc>
   <defs>
     <style>
       .mono {
@@ -8,39 +8,20 @@
         font-variant-ligatures: none;
       }
       .bg { fill: #f6f8fa; }
-      .panel {
-        fill: #ffffff;
-        stroke: #d0d7de;
-        stroke-width: 2;
-        vector-effect: non-scaling-stroke;
-      }
-      .titlebar { fill: #eef2f6; }
-      .divider { stroke: #d8dee4; stroke-width: 1; vector-effect: non-scaling-stroke; }
-      .dim { fill: #57606a; }
       .mark { fill: #0f141b; }
     </style>
   </defs>
 
   <rect class="bg" width="1600" height="420" rx="30"/>
-  <rect class="panel" x="22" y="22" width="1556" height="376" rx="22"/>
-  <rect class="titlebar" x="22" y="22" width="1556" height="56" rx="22"/>
-  <rect class="titlebar" x="22" y="56" width="1556" height="22"/>
-  <line class="divider" x1="22" y1="78" x2="1578" y2="78"/>
 
-  <circle cx="58" cy="50" r="8" fill="#ff5f56"/>
-  <circle cx="84" cy="50" r="8" fill="#ffbd2e"/>
-  <circle cx="110" cy="50" r="8" fill="#27c93f"/>
-
-  <text class="mono dim" x="800" y="56" font-size="18" text-anchor="middle">opensearch</text>
-
-  <g class="mono mark" font-size="24">
-    <text x="78" y="132" xml:space="preserve"> ________  ________  _______   ________   ________  _______   ________  ________  ________  ___  ___     </text>
-    <text x="78" y="166" xml:space="preserve">|\   __  \|\   __  \|\  ___ \ |\   ___  \|\   ____\|\  ___ \ |\   __  \|\   __  \|\   ____\|\  \|\  \    </text>
-    <text x="78" y="200" xml:space="preserve">\ \  \|\  \ \  \|\  \ \   __/|\ \  \\ \  \ \  \___|\ \   __/|\ \  \|\  \ \  \|\  \ \  \___|\ \  \\\  \   </text>
-    <text x="78" y="234" xml:space="preserve"> \ \  \\\  \ \   ____\ \  \_|/_\ \  \\ \  \ \_____  \ \  \_|/_\ \   __  \ \   _  _\ \  \    \ \   __  \  </text>
-    <text x="78" y="268" xml:space="preserve">  \ \  \\\  \ \  \___|\ \  \_|\ \ \  \\ \  \|____|\  \ \  \_|\ \ \  \ \  \ \  \\  \\ \  \____\ \  \ \  \ </text>
-    <text x="78" y="302" xml:space="preserve">   \ \_______\ \__\    \ \_______\ \__\\ \__\____\_\  \ \_______\ \__\ \__\ \__\\ _\\ \_______\ \__\ \__\</text>
-    <text x="78" y="336" xml:space="preserve">    \|_______|\|__|     \|_______|\|__| \|__|\_________\|_______|\|__|\|__|\|__|\|__|\|_______|\|__|\|__|</text>
-    <text x="78" y="370" xml:space="preserve">                                            \|_________|                                                </text>
+  <g class="mono mark" font-size="24" text-anchor="middle">
+    <text x="800" y="112" xml:space="preserve"> ________  ________  _______   ________   ________  _______   ________  ________  ________  ___  ___     </text>
+    <text x="800" y="146" xml:space="preserve">|\   __  \|\   __  \|\  ___ \ |\   ___  \|\   ____\|\  ___ \ |\   __  \|\   __  \|\   ____\|\  \|\  \    </text>
+    <text x="800" y="180" xml:space="preserve">\ \  \|\  \ \  \|\  \ \   __/|\ \  \\ \  \ \  \___|\ \   __/|\ \  \|\  \ \  \|\  \ \  \___|\ \  \\\  \   </text>
+    <text x="800" y="214" xml:space="preserve"> \ \  \\\  \ \   ____\ \  \_|/_\ \  \\ \  \ \_____  \ \  \_|/_\ \   __  \ \   _  _\ \  \    \ \   __  \  </text>
+    <text x="800" y="248" xml:space="preserve">  \ \  \\\  \ \  \___|\ \  \_|\ \ \  \\ \  \|____|\  \ \  \_|\ \ \  \ \  \ \  \\  \\ \  \____\ \  \ \  \ </text>
+    <text x="800" y="282" xml:space="preserve">   \ \_______\ \__\    \ \_______\ \__\\ \__\____\_\  \ \_______\ \__\ \__\ \__\\ _\\ \_______\ \__\ \__\</text>
+    <text x="800" y="316" xml:space="preserve">    \|_______|\|__|     \|_______|\|__| \|__|\_________\|_______|\|__|\|__|\|__|\|__|\|_______|\|__|\|__|</text>
+    <text x="800" y="350" xml:space="preserve">                                            \|_________|                                                </text>
   </g>
 </svg>

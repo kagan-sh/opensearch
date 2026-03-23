@@ -26,6 +26,7 @@ Then it returns structured JSON your agent can act on.
 | Configure a SearXNG instance for web search | [SearXNG setup](guides/searxng.md) |
 | Configure sources, depth, and synthesis | [Configuration](reference/configuration.md) |
 | Understand the JSON response | [Result contract](reference/result-contract.md) |
+| Give an LLM the direct skill reference | [LLM quick reference](https://raw.githubusercontent.com/kagan-sh/opensearch/main/SKILL.md) |
 | See what sources ship today | [Sources and extension status](reference/sources.md) |
 | Work on the repo | [Contributing](guides/contributing.md) |
 | Propose a feature or new datasource | [Feature requests](guides/feature-requests.md) |

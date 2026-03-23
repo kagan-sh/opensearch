@@ -16,7 +16,8 @@
   <a href="https://kagan-sh.github.io/opensearch/">Docs</a> ·
   <a href="https://kagan-sh.github.io/opensearch/quickstart/">Quickstart</a> ·
   <a href="https://kagan-sh.github.io/opensearch/guides/searxng/">SearXNG Setup</a> ·
-  <a href="https://kagan-sh.github.io/opensearch/reference/result-contract/">Reference</a>
+  <a href="https://kagan-sh.github.io/opensearch/reference/result-contract/">Reference</a> ·
+  <a href="https://raw.githubusercontent.com/kagan-sh/opensearch/main/SKILL.md">LLM Quick Reference</a>
 </h3>
 
 ---
