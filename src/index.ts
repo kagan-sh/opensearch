@@ -20,6 +20,30 @@ import { synthesize } from "./synth";
 
 const BRAND = "OpenSearch";
 const TAGLINE = "evidence-backed search";
+const BRAND_ORIGIN = "@kagan-sh/opensearch";
+
+type ToolPhase = "searching" | "synthesizing" | "completed";
+type ToolMetadata = {
+  brand: typeof BRAND;
+  brand_tagline: typeof TAGLINE;
+  brand_origin: typeof BRAND_ORIGIN;
+  brand_surface: "plugin";
+  phase: ToolPhase;
+  query: string;
+  depth: Config["depth"];
+  sources: SourceId[];
+  source_summary: string;
+  source_badges: string[];
+  status_note?: string;
+  status?: Result["status"];
+  answer?: Result["answer"];
+  duration_ms?: number;
+  sources_requested?: number;
+  sources_queried?: number;
+  sources_yielded?: number;
+  source_errors?: number;
+  sources_unavailable?: Result["meta"]["sources_unavailable"];
+};
 
 function sourceBadge(source: SourceId) {
   if (source === "session") return "SESSION";
@@ -49,6 +73,7 @@ function describeSources(sources: SourceId[]) {
 }
 
 function runningTitle(sources: SourceId[]) {
+  if (sources.length === 0) return `${BRAND} // checking sources`;
   return `${BRAND} // scanning ${describeSources(sources)}`;
 }
 
@@ -62,17 +87,28 @@ function doneTitle(result: Result) {
   return `${BRAND} // ${result.meta.sources_yielded} result${result.meta.sources_yielded === 1 ? "" : "s"}`;
 }
 
+function statusNote(phase: ToolPhase, sources: SourceId[]) {
+  if (phase === "searching") {
+    if (sources.length === 0) return "checking available sources";
+    return `scanning ${describeSources(sources)}`;
+  }
+  if (phase === "synthesizing") return "assembling evidence";
+  return undefined;
+}
+
 function toolMetadata(input: {
-  phase: "searching" | "synthesizing" | "completed";
+  phase: ToolPhase;
   query: string;
   depth: Config["depth"];
   sources: SourceId[];
   result?: Result;
-}) {
+}): ToolMetadata {
+  const note = statusNote(input.phase, input.sources);
+
   return {
     brand: BRAND,
     brand_tagline: TAGLINE,
-    brand_origin: "@kagan-sh/opensearch",
+    brand_origin: BRAND_ORIGIN,
     brand_surface: "plugin",
     phase: input.phase,
     query: previewQuery(input.query),
@@ -80,6 +116,7 @@ function toolMetadata(input: {
     sources: input.sources,
     source_summary: describeSources(input.sources),
     source_badges: sourceBadges(input.sources),
+    ...(note ? { status_note: note } : {}),
     ...(input.result
       ? {
           status: input.result.status,
@@ -240,7 +277,6 @@ export const OpensearchPlugin: Plugin = async (ctx) => {
                   sources: resolved.sources,
                 }),
                 raw_results: search.raw.length,
-                status_note: "assembling evidence",
               },
             });
 

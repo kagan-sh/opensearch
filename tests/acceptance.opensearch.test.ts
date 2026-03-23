@@ -14,6 +14,19 @@ type State = {
   proc: ReturnType<typeof spawn>;
 };
 
+type ProviderPayload = {
+  providers: Array<{
+    id: string;
+    models: Record<string, unknown>;
+  }>;
+  default?: Record<string, string>;
+};
+
+type MetadataCall = {
+  title?: string;
+  metadata?: Record<string, unknown>;
+};
+
 async function sleep(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -64,6 +77,21 @@ async function stop(proc: State["proc"]) {
   }
 }
 
+async function providerModel(base: string) {
+  const res = await fetch(`${base}/config/providers`);
+  const payload = (await res.json()) as ProviderPayload;
+  const provider = payload.providers.find(
+    (item) => Object.keys(item.models).length > 0,
+  );
+
+  if (!provider) throw new Error("no provider/model available");
+
+  return {
+    provider: provider.id,
+    model: payload.default?.[provider.id] ?? Object.keys(provider.models)[0],
+  };
+}
+
 async function boot(dir: string) {
   const n = await port();
   const base = `http://127.0.0.1:${n}`;
@@ -94,16 +122,23 @@ async function boot(dir: string) {
   return { dir, base, proc } satisfies State;
 }
 
-function ctx(dir: string) {
+function runtime(dir: string) {
+  const calls: MetadataCall[] = [];
+
   return {
-    sessionID: "s",
-    messageID: "m",
-    agent: "build",
-    directory: dir,
-    worktree: dir,
-    abort: new AbortController().signal,
-    metadata() {},
-    ask: async () => {},
+    calls,
+    context: {
+      sessionID: "s",
+      messageID: "m",
+      agent: "build",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata(input: MetadataCall) {
+        calls.push(input);
+      },
+      ask: async () => {},
+    },
   };
 }
 
@@ -129,6 +164,25 @@ describe("opensearch acceptance", () => {
     const res = await fetch(`${state.base}/experimental/tool/ids`);
     const ids = (await res.json()) as string[];
     expect(ids.includes("opensearch")).toBe(true);
+  });
+
+  it("lists opensearch cleanly in OpenCode tool definitions", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opensearch-test-"));
+    state = await boot(dir);
+
+    const choice = await providerModel(state.base);
+    const res = await fetch(
+      `${state.base}/experimental/tool?provider=${encodeURIComponent(choice.provider)}&model=${encodeURIComponent(choice.model)}`,
+    );
+    const tools = (await res.json()) as Array<{
+      id: string;
+      description: string;
+    }>;
+    const opensearch = tools.find((tool) => tool.id === "opensearch");
+
+    expect(opensearch).toBeDefined();
+    expect(opensearch?.description).toContain("OpenSearch");
+    expect(opensearch?.description).toContain("evidence-backed search");
   });
 
   it("returns no results for unmatched query", async () => {
@@ -157,9 +211,10 @@ describe("opensearch acceptance", () => {
 
     const tool = hooks.tool?.opensearch;
     if (!tool) throw new Error("opensearch tool missing");
+    const execution = runtime(dir);
     const out = await tool.execute(
       { query: `missing-${Date.now()}`, sources: ["session"], depth: "quick" },
-      ctx(dir),
+      execution.context,
     );
     const body = JSON.parse(out) as {
       status: string;
@@ -170,5 +225,23 @@ describe("opensearch acceptance", () => {
     expect(body.status).toBe("no_results");
     expect(body.answer).toBe("No results found");
     expect(body.sources).toHaveLength(0);
+    expect(execution.calls[0]).toMatchObject({
+      title: "OpenSearch // scanning session only",
+      metadata: {
+        brand: "OpenSearch",
+        phase: "searching",
+        source_summary: "session only",
+        status_note: "scanning session only",
+      },
+    });
+    expect(execution.calls[execution.calls.length - 1]).toMatchObject({
+      title: "OpenSearch // no matches",
+      metadata: {
+        brand: "OpenSearch",
+        phase: "completed",
+        status: "no_results",
+        source_summary: "session only",
+      },
+    });
   });
 });

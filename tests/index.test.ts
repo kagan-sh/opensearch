@@ -129,7 +129,22 @@ describe("opensearch tool", () => {
     expect(body.meta.sources_queried).toBe(0);
     expect(body.meta.sources_yielded).toBe(0);
     expect(body.meta.sources_unavailable).toEqual(["web"]);
-    expect(runtime.calls[0]?.metadata?.phase).toBe("searching");
+    expect(runtime.calls[0]).toMatchObject({
+      title: "OpenSearch // checking sources",
+      metadata: {
+        brand: "OpenSearch",
+        brand_tagline: "evidence-backed search",
+        brand_origin: "@kagan-sh/opensearch",
+        brand_surface: "plugin",
+        phase: "searching",
+        query: "web-only-request",
+        depth: "quick",
+        sources: [],
+        source_summary: "no sources",
+        source_badges: ["OFFLINE"],
+        status_note: "checking available sources",
+      },
+    });
     expect(runtime.calls[runtime.calls.length - 1]?.metadata?.source_summary).toBe(
       "no sources",
     );
@@ -170,7 +185,7 @@ describe("opensearch tool", () => {
         null,
         2,
       ),
-      metadata: {},
+      metadata: { existing: true },
     };
 
     await hooks["tool.execute.after"]?.(
@@ -189,9 +204,11 @@ describe("opensearch tool", () => {
 
     expect(completed.title).toBe("OpenSearch // 3 raw results");
     expect(completed.metadata).toMatchObject({
+      existing: true,
       brand: "OpenSearch",
       brand_tagline: "evidence-backed search",
       brand_origin: "@kagan-sh/opensearch",
+      brand_surface: "plugin",
       phase: "completed",
       depth: "thorough",
       source_summary: "web + code",
@@ -320,9 +337,11 @@ describe("opensearch tool", () => {
     const tool = hooks.tool?.opensearch;
     if (!tool) throw new Error("opensearch tool missing");
 
+    const runtime = createToolContext("/tmp/opensearch");
+
     const output = await tool.execute(
       { query: "example", sources: ["code"] },
-      createToolContext("/tmp/opensearch").context,
+      runtime.context,
     );
     const body = JSON.parse(output) as {
       status: string;
@@ -339,6 +358,26 @@ describe("opensearch tool", () => {
     );
     expect(body.sources).toHaveLength(1);
     expect(body.meta.sources_yielded).toBe(1);
+    expect(runtime.calls[1]).toMatchObject({
+      title: "OpenSearch // assembling evidence",
+      metadata: {
+        brand: "OpenSearch",
+        brand_surface: "plugin",
+        phase: "synthesizing",
+        status_note: "assembling evidence",
+        raw_results: 1,
+      },
+    });
+    expect(runtime.calls[runtime.calls.length - 1]).toMatchObject({
+      title: "OpenSearch // evidence fallback",
+      metadata: {
+        brand: "OpenSearch",
+        brand_surface: "plugin",
+        phase: "completed",
+        status: "raw_fallback",
+        fallback: "synthesis_error",
+      },
+    });
   });
 
   it("returns raw SearXNG web results when configured", async () => {
