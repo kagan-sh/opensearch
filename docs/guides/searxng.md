@@ -31,6 +31,53 @@ Example local URL:
 export OPENSEARCH_WEB_URL="http://localhost:8080"
 ```
 
+## Local Docker Compose example
+
+If you want a local instance, a minimal Compose setup looks like this:
+
+```yaml
+services:
+  searxng:
+    image: ghcr.io/searxng/searxng:latest
+    ports:
+      - "127.0.0.1:8888:8080"
+    environment:
+      SEARXNG_BASE_URL: http://127.0.0.1:8888/
+      FORCE_OWNERSHIP: "false"
+    volumes:
+      - ./config:/etc/searxng
+      - ./data:/var/cache/searxng
+```
+
+With a matching `config/settings.yml`:
+
+```yaml
+use_default_settings: true
+
+server:
+  secret_key: change-me
+  limiter: false
+  image_proxy: false
+
+search:
+  formats:
+    - html
+    - json
+```
+
+Then point OpenSearch at it:
+
+```bash
+export OPENSEARCH_WEB_URL="http://127.0.0.1:8888"
+```
+
+Optional shell aliases:
+
+```bash
+alias searstart='docker compose -f ~/.config/opencode/searxng/docker-compose.yml up -d'
+alias searstop='docker compose -f ~/.config/opencode/searxng/docker-compose.yml down -v --remove-orphans'
+```
+
 ## Why self-hosting is preferred
 
 Public instances often:
